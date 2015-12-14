@@ -31,14 +31,18 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 	public class ShowIPs implements ClipboardOwner, ActionListener
 	{
 		
 		public static Button button;
 		public static JFileChooser fc = new JFileChooser();
-		public static JList<String> listview;
-		public static DefaultListModel<String> model = new DefaultListModel<>();
+		public static JTable listview;
+		public static DefaultTableModel model = new DefaultTableModel(new Object[]{"IP","Host","Type","Log"}, 0);
 		public static ActionListener ActionL = new ActionListener() 
 		{
 			class foundIP
@@ -161,14 +165,25 @@ import javax.swing.JList;
 			      try 
 			      {
 						addr = InetAddress.getByName(item.getKey());
+						
 						String host = addr.getHostName();
+						String type = "extern";
+						if (addr.isAnyLocalAddress())
+						{
+							type = "local";
+						}
+						else if(addr.isMulticastAddress())
+						{
+							type = "multi";
+						}
 						line = item.getKey() + " " + host + " " + item.getValue().line;
-						model.addElement(line);
-					
+						model.addRow(new Object[]{item.getKey(),host,type,item.getValue().line});	
 			      }
 			      catch (UnknownHostException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
+						line = item.getKey() + " " +  " " + item.getValue().line;
+						model.addRow(new Object[]{item.getKey(),"invalid","",item.getValue().line});
 						
 					}
 			      if (line != null) sb.append(line);
@@ -228,12 +243,16 @@ import javax.swing.JList;
 		//Create a file chooser
 		  // Create frame with specific title
 		  Frame frame = new Frame("ShowIPs");
+		  frame.setLayout(new BorderLayout());
 		  // Create a component to add to the frame; in this case a text area with sample text
 		  button = new Button("Click Me!!");
 		  button.addActionListener(ActionL);
+		  listview = new JTable(model);
+		  listview.getColumnModel().getColumn(0).setCellRenderer(new StatusColumnCellRenderer());
+		  JScrollPane pane = new JScrollPane(listview);
+		  frame.add(pane, BorderLayout.NORTH);
 		  frame.add(button, BorderLayout.SOUTH);
-		  listview = new JList<String>(model);
-		  frame.add(listview, BorderLayout.NORTH);
+		  
 		  int width = 300;
 		  int height = 300;
 		  frame.setSize(width, height);
