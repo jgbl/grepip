@@ -2,6 +2,7 @@ package org.de.jmg.showips;
 	import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Frame;
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
@@ -16,6 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -31,14 +33,16 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 	public class ShowIPs implements ClipboardOwner, ActionListener
 	{
-		
+		public static Frame frame;
 		public static Button button;
 		public static JFileChooser fc = new JFileChooser();
 		public static JTable listview;
@@ -154,6 +158,7 @@ import javax.swing.table.TableModel;
 			{
 			   StringBuilder sb = new StringBuilder();
 			   boolean first = true;
+			   model.setRowCount(0);
 			   for (Entry<String, foundIP>item : list)
 			   {
 			      if (first)
@@ -165,10 +170,10 @@ import javax.swing.table.TableModel;
 			      try 
 			      {
 						addr = InetAddress.getByName(item.getKey());
-						
+						frame.setTitle(item.getKey());
 						String host = addr.getHostName();
 						String type = "extern";
-						if (addr.isAnyLocalAddress())
+						if (addr.isAnyLocalAddress() || addr.isLinkLocalAddress() || addr.isLoopbackAddress() || addr.isMCLinkLocal() || addr.isMCNodeLocal() || addr.isMCOrgLocal() || addr.isMCSiteLocal() || addr.isSiteLocalAddress())
 						{
 							type = "local";
 						}
@@ -188,6 +193,8 @@ import javax.swing.table.TableModel;
 					}
 			      if (line != null) sb.append(line);
 			   }
+			   listview.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+			   listview.doLayout();
 			   return sb.toString();
 			}
 
@@ -242,7 +249,7 @@ import javax.swing.table.TableModel;
 	  {
 		//Create a file chooser
 		  // Create frame with specific title
-		  Frame frame = new Frame("ShowIPs");
+		  frame = new Frame("ShowIPs");
 		  frame.setLayout(new BorderLayout());
 		  // Create a component to add to the frame; in this case a text area with sample text
 		  button = new Button("Click Me!!");
@@ -250,7 +257,7 @@ import javax.swing.table.TableModel;
 		  listview = new JTable(model);
 		  listview.getColumnModel().getColumn(0).setCellRenderer(new StatusColumnCellRenderer());
 		  JScrollPane pane = new JScrollPane(listview);
-		  frame.add(pane, BorderLayout.NORTH);
+		  frame.add(pane, BorderLayout.CENTER);
 		  frame.add(button, BorderLayout.SOUTH);
 		  
 		  int width = 300;
@@ -258,6 +265,34 @@ import javax.swing.table.TableModel;
 		  frame.setSize(width, height);
 		  frame.addWindowListener(WinLi);
 		  frame.setVisible(true);
+		  listview.addMouseListener(new java.awt.event.MouseAdapter() {
+			    @Override
+			    public void mouseClicked(java.awt.event.MouseEvent evt) {
+			        int row = listview.rowAtPoint(evt.getPoint());
+			        int col = listview.columnAtPoint(evt.getPoint());
+			        DefaultTableModel tableModel = (DefaultTableModel) listview.getModel();
+				    
+			        String ip = (String) tableModel.getValueAt(row,0);
+			        
+			        if (ip != null) 
+			        {
+			        	try 
+			        	{
+			        		JTextArea textArea = new JTextArea(30, 75);
+			        	    textArea.setText(shell("whois " + ip));
+			        	    textArea.setEditable(false);
+			        	       
+			        	      // wrap a scrollpane around it
+			        	    JScrollPane scrollPane = new JScrollPane(textArea);
+			        		JOptionPane.showMessageDialog(listview, scrollPane);
+						} catch (HeadlessException | IOException
+								| InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+			        }
+			    }
+			});
 	  }
 
 	@Override
@@ -270,5 +305,23 @@ import javax.swing.table.TableModel;
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	
+	public static String shell(String cmd) throws IOException, InterruptedException
+	{
+		Process p = Runtime.getRuntime().exec(cmd);
+	    p.waitFor();
+
+	    BufferedReader reader = 
+	         new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+	    String line = "";
+	    StringBuilder sb = new StringBuilder();
+	    while ((line = reader.readLine())!= null) {
+		sb.append(line + "\n");
+	    }
+	    return sb.toString();
+
 	}
 	}
