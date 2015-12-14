@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -36,7 +37,8 @@ import javax.swing.JList;
 		
 		public static Button button;
 		public static JFileChooser fc = new JFileChooser();
-		public static JList<String> listview = new JList<>();
+		public static JList<String> listview;
+		public static DefaultListModel<String> model = new DefaultListModel<>();
 		public static ActionListener ActionL = new ActionListener() 
 		{
 			class foundIP
@@ -63,8 +65,8 @@ import javax.swing.JList;
 				  if (returnVal == JFileChooser.APPROVE_OPTION) {
 					  String IPADDRESS_PATTERN = 
 			                    "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
-			            String IP6PatternStd = "(^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$)";
-			            String IP6PatternCompr = "(^((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)$)";
+			            String IP6PatternStd = "^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$";
+			            String IP6PatternCompr = "^((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)$";
 			            String IP6PatternAlt = "(?<![[:alnum:]]|[[:alnum:]]:)(?:(?:[a-f0-9]{1,4}:){7}[a-f0-9]{1,4}|(?:[a-f0-9]{1,4}:){1,6}:(?:[a-f0-9]{1,4}:){0,5}[a-f0-9]{1,4})(?![[:alnum:]]:?)";
 			            Pattern patternip4 = Pattern.compile(IPADDRESS_PATTERN);
 			            Pattern patternip6std = Pattern.compile(IP6PatternStd);
@@ -161,7 +163,7 @@ import javax.swing.JList;
 						addr = InetAddress.getByName(item.getKey());
 						String host = addr.getHostName();
 						line = item.getKey() + " " + host + " " + item.getValue().line;
-						listview.add(new JLabel(line));
+						model.addElement(line);
 					
 			      }
 			      catch (UnknownHostException e1) {
@@ -230,6 +232,7 @@ import javax.swing.JList;
 		  button = new Button("Click Me!!");
 		  button.addActionListener(ActionL);
 		  frame.add(button, BorderLayout.SOUTH);
+		  listview = new JList<String>(model);
 		  frame.add(listview, BorderLayout.NORTH);
 		  int width = 300;
 		  int height = 300;
