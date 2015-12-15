@@ -182,6 +182,11 @@ import javax.swing.table.TableModel;
 							type = "multi";
 						}
 						line = item.getKey() + " " + host + " " + item.getValue().line;
+						if (item.getValue().line.contains("DROP"))
+						{
+							type += " drop";
+						}
+						
 						model.addRow(new Object[]{item.getKey(),host,type,item.getValue().line});	
 			      }
 			      catch (UnknownHostException e1) {

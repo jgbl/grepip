@@ -30,6 +30,19 @@ public class StatusColumnCellRenderer extends DefaultTableCellRenderer {
 	    	{
 		      l.setBackground(Color.YELLOW);
 		    }
+	    	else if (type.equalsIgnoreCase("extern drop")) 
+		    {
+		      l.setBackground(Color.PINK);
+		    } 
+	    	else if (type.equalsIgnoreCase("local drop")) 
+	    	{
+		      l.setBackground(Color.GRAY);
+		    }
+	    	else if (type.equalsIgnoreCase("multi drop")) 
+	    	{
+		      l.setBackground(Color.ORANGE);
+		    }
+	    	
 	    }
 	    //Get the status for the current row.
 	    
