@@ -30,6 +30,10 @@ public class StatusColumnCellRenderer extends DefaultTableCellRenderer {
 	    	{
 		      l.setBackground(Color.YELLOW);
 		    }
+	    	else if (type.equalsIgnoreCase("multi local")) 
+	    	{
+		      l.setBackground(Color.CYAN);
+		    }
 	    	else if (type.equalsIgnoreCase("extern drop")) 
 		    {
 		      l.setBackground(Color.PINK);
@@ -41,6 +45,10 @@ public class StatusColumnCellRenderer extends DefaultTableCellRenderer {
 	    	else if (type.equalsIgnoreCase("multi drop")) 
 	    	{
 		      l.setBackground(Color.ORANGE);
+		    }
+	    	else if (type.equalsIgnoreCase("multi local drop")) 
+	    	{
+		      l.setBackground(Color.BLUE);
 		    }
 	    	
 	    }

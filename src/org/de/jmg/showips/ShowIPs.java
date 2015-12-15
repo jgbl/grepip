@@ -173,11 +173,15 @@ import javax.swing.table.TableModel;
 						frame.setTitle(item.getKey());
 						String host = addr.getHostName();
 						String type = "extern";
-						if (addr.isAnyLocalAddress() || addr.isLinkLocalAddress() || addr.isLoopbackAddress() || addr.isMCLinkLocal() || addr.isMCNodeLocal() || addr.isMCOrgLocal() || addr.isMCSiteLocal() || addr.isSiteLocalAddress())
+						if (addr.isAnyLocalAddress() || addr.isLinkLocalAddress() || addr.isLoopbackAddress() || addr.isSiteLocalAddress())
 						{
 							type = "local";
 						}
-						else if(addr.isMulticastAddress())
+						else if (addr.isMCLinkLocal() || addr.isMCNodeLocal() || addr.isMCOrgLocal() || addr.isMCSiteLocal() )
+						{
+							type = "multi local";
+						}
+						else if(addr.isMulticastAddress() )
 						{
 							type = "multi";
 						}
