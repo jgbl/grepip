@@ -18,9 +18,11 @@ public class StatusColumnCellRenderer extends DefaultTableCellRenderer {
 	    {
 	    	DefaultTableModel tableModel = (DefaultTableModel) table.getModel();
 		    String type = tableModel.getValueAt(row, 2).toString(); 
-	    	if (type.equalsIgnoreCase("extern")) 
+	    	l.setForeground(Color.BLACK);
+		    if (type.equalsIgnoreCase("extern")) 
 		    {
 		      l.setBackground(Color.RED);
+		      l.setForeground(Color.WHITE);
 		    } 
 	    	else if (type.equalsIgnoreCase("local")) 
 	    	{
@@ -49,8 +51,13 @@ public class StatusColumnCellRenderer extends DefaultTableCellRenderer {
 	    	else if (type.equalsIgnoreCase("multi local drop")) 
 	    	{
 		      l.setBackground(Color.BLUE);
+		      l.setForeground(Color.WHITE);
 		    }
-	    	
+	    	if (type.endsWith("critical")) 
+	    	{
+		      l.setBackground(Color.BLACK);
+		      l.setForeground(Color.WHITE);
+		    }
 	    }
 	    //Get the status for the current row.
 	    

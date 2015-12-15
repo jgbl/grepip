@@ -1,6 +1,7 @@
 package org.de.jmg.showips;
 	import java.awt.BorderLayout;
 import java.awt.Button;
+import java.awt.Desktop;
 import java.awt.Frame;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
@@ -10,6 +11,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
@@ -19,6 +21,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +53,8 @@ import javax.swing.table.TableModel;
 		public static JFileChooser fc = new JFileChooser();
 		public static JTable listview;
 		public static DefaultTableModel model = new DefaultTableModel(new Object[]{"IP","Host","Type","Log"}, 0);
-		public static ActionListener ActionL = new ActionListener() 
+		public static LinkedHashMap<String,String[]> critical = new LinkedHashMap<>();
+        public static ActionListener ActionL = new ActionListener() 
 		{
 			class foundIP
 			{
@@ -169,9 +176,18 @@ import javax.swing.table.TableModel;
 			      String line = null;
 			      try 
 			      {
+			    	  	String domain = null;
 						addr = InetAddress.getByName(item.getKey());
 						frame.setTitle(item.getKey());
 						String host = addr.getHostName();
+						if (!host.equalsIgnoreCase(item.getKey()))
+						{
+							domain = new URI("//" + host).getHost();
+							if (domain.equalsIgnoreCase(host))
+							{
+								domain = domain.substring(1 + domain.lastIndexOf(".", domain.lastIndexOf(".")-1));
+							}
+						}
 						String type = "extern";
 						if (addr.isAnyLocalAddress() || addr.isLinkLocalAddress() || addr.isLoopbackAddress() || addr.isSiteLocalAddress())
 						{
@@ -190,10 +206,14 @@ import javax.swing.table.TableModel;
 						{
 							type += " drop";
 						}
+						if (critical.containsKey(item.getKey()) || critical.containsKey(domain))
+						{
+							type += " critical";
+						}
 						
 						model.addRow(new Object[]{item.getKey(),host,type,item.getValue().line});	
 			      }
-			      catch (UnknownHostException e1) {
+			      catch (UnknownHostException | URISyntaxException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 						line = item.getKey() + " " +  " " + item.getValue().line;
@@ -285,23 +305,91 @@ import javax.swing.table.TableModel;
 			        
 			        if (ip != null) 
 			        {
-			        	try 
+			        	if (evt.getButton() == MouseEvent.BUTTON3)
 			        	{
-			        		JTextArea textArea = new JTextArea(30, 75);
-			        	    textArea.setText(shell("whois " + ip));
-			        	    textArea.setEditable(false);
-			        	       
-			        	      // wrap a scrollpane around it
-			        	    JScrollPane scrollPane = new JScrollPane(textArea);
-			        		JOptionPane.showMessageDialog(listview, scrollPane);
-						} catch (HeadlessException | IOException
-								| InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+			        		try 
+				        	{
+				        		JTextArea textArea = new JTextArea(30, 75);
+				        	    textArea.setText(shell("whois " + ip));
+				        	    textArea.setEditable(false);
+				        	       
+				        	      // wrap a scrollpane around it
+				        	    JScrollPane scrollPane = new JScrollPane(textArea);
+				        		JOptionPane.showMessageDialog(listview, scrollPane);
+							} catch (HeadlessException | IOException
+									| InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+			        	}
+			        	else if (evt.getButton() == MouseEvent.BUTTON2)
+			        	{
+			        		try 
+				        	{
+				        		JTextArea textArea = new JTextArea(30, 75);
+				        		String domain = null; 
+				        		String host = (String) tableModel.getValueAt(row,1);
+				        		if (!host.equalsIgnoreCase(ip))
+								{
+									domain = new URI("//" + host).getHost();
+									if (domain.equalsIgnoreCase(host))
+									{
+										domain = domain.substring(1 + domain.lastIndexOf(".", domain.lastIndexOf(".")-1));
+									}
+								}
+				        	    if (critical.containsKey(ip))
+				        		{
+				        	    	textArea.setText(join (critical.get(ip),"\n"));
+				        		}
+				        	    else if (critical.containsKey(domain))
+				        		{
+				        	    	textArea.setText(join (critical.get(domain),"\n"));
+				        		}
+				        	    textArea.setEditable(false);
+				        	       
+				        	      // wrap a scrollpane around it
+				        	    JScrollPane scrollPane = new JScrollPane(textArea);
+				        		JOptionPane.showMessageDialog(listview, scrollPane);
+							} catch (HeadlessException | URISyntaxException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+			        	}
+			        	else
+			        	{
+			        		try {
+								openWebpage(new URL("http://www.ipvoid.com/scan/"+ ip + "/"));
+							} catch (MalformedURLException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+			        	}
+			        	
 			        }
 			    }
 			});
+		  try (BufferedReader br = new BufferedReader(new FileReader(new File("/opt/critical-stack/frameworks/intel/master-public.bro.dat")))) {
+				    String line;
+				    while ((line = br.readLine()) != null) {
+				       // process the line.
+				    	if (!line.startsWith("#field"))
+				    	{
+				    		String [] fields = line.split("\\t");
+				    		if (!critical.containsKey(fields[0]))
+				    		{
+				    			critical.put(fields[0], fields);
+				    		}
+				    	}
+				    }
+			}
+			//This is where a real application would open the file.
+          catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 	  }
 
 	@Override
@@ -333,4 +421,38 @@ import javax.swing.table.TableModel;
 	    return sb.toString();
 
 	}
+	public static void openWebpage(URI uri) {
+	    Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+	    if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+	        try {
+	            desktop.browse(uri);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
+
+	public static void openWebpage(URL url) {
+	    try {
+	        openWebpage(url.toURI());
+	    } catch (URISyntaxException e) {
+	        e.printStackTrace();
+	    }
+	}
+	public static String join(String[] list, String conjunction)
+	{
+	   StringBuilder sb = new StringBuilder();
+	   boolean first = true;
+	   for (String item : list)
+	   {
+	      if (first)
+	         first = false;
+	      else
+	         sb.append(conjunction);
+	      String line = item;
+	      if (line != null) sb.append(line);
+	   }
+	   return sb.toString();
+	}
+
+}
