@@ -179,7 +179,7 @@ import javax.swing.table.DefaultTableModel;
 						if (!host.equalsIgnoreCase(item.getKey()))
 						{
 							domain = new URI("//" + host).getHost();
-							if (domain.equalsIgnoreCase(host))
+							if (domain != null && domain.equalsIgnoreCase(host))
 							{
 								domain = domain.substring(1 + domain.lastIndexOf(".", domain.lastIndexOf(".")-1));
 							}
