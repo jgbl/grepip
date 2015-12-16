@@ -35,16 +35,12 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 	public class ShowIPs implements ClipboardOwner, ActionListener
 	{
