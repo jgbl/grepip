@@ -206,11 +206,26 @@ import javax.swing.table.TableModel;
 						{
 							type += " drop";
 						}
-						if (critical.containsKey(item.getKey()) || critical.containsKey(domain))
+						if (critical.containsKey(item.getKey()) || critical.containsKey(domain) || critical.containsKey(host))
 						{
 							type += " critical";
 						}
-						
+						else
+						{
+							if (!host.equalsIgnoreCase(item.getKey()))
+							{
+								int i = - 1;
+								while ( (i = host.indexOf('.', i+1)) >= 0)
+								{
+									domain = host.substring(i+1);
+									if (critical.containsKey(domain))
+									{
+										type += " critical";
+										break;
+									}
+								}
+							}
+						}
 						model.addRow(new Object[]{item.getKey(),host,type,item.getValue().line});	
 			      }
 			      catch (UnknownHostException | URISyntaxException e1) {
@@ -345,6 +360,26 @@ import javax.swing.table.TableModel;
 				        		{
 				        	    	textArea.setText(join (critical.get(domain),"\n"));
 				        		}
+				        	    else if (critical.containsKey(host))
+				        		{
+				        	    	textArea.setText(join (critical.get(host),"\n"));
+				        		}
+				        	    else
+								{
+									if (!host.equalsIgnoreCase(ip))
+									{
+										int i = - 1;
+										while ( (i = host.indexOf('.', i+1)) >= 0)
+										{
+											domain = host.substring(i+1);
+											if (critical.containsKey(domain))
+											{
+												textArea.setText(join (critical.get(domain),"\n"));
+												break;
+											}
+										}
+									}
+								}
 				        	    textArea.setEditable(false);
 				        	       
 				        	      // wrap a scrollpane around it
