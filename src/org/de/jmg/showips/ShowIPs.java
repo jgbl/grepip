@@ -339,92 +339,102 @@ import javax.swing.table.DefaultTableModel;
 			        int row = listview.rowAtPoint(evt.getPoint());
 			        int col = listview.columnAtPoint(evt.getPoint());
 			        DefaultTableModel tableModel = (DefaultTableModel) listview.getModel();
-				    
-			        String ip = (String) tableModel.getValueAt(row,0);
-			        
-			        if (ip != null) 
+				    if (col == 0 || col == 1)
 			        {
-			        	if (evt.getButton() == MouseEvent.BUTTON3)
-			        	{
-			        		try 
+				    	String ip = (String) tableModel.getValueAt(row,0);
+				    	if (ip != null) 
+				        {
+				        	if (evt.getButton() == MouseEvent.BUTTON3)
 				        	{
-				        		JTextArea textArea = new JTextArea(30, 75);
-				        	    textArea.setText(shell("whois " + ip));
-				        	    textArea.setEditable(false);
-				        	       
-				        	      // wrap a scrollpane around it
-				        	    JScrollPane scrollPane = new JScrollPane(textArea);
-				        		JOptionPane.showMessageDialog(listview, scrollPane);
-							} catch (HeadlessException | IOException
-									| InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-			        	}
-			        	else if (evt.getButton() == MouseEvent.BUTTON2)
-			        	{
-			        		try 
-				        	{
-				        		JTextArea textArea = new JTextArea(30, 75);
-				        		String domain = null; 
-				        		String host = (String) tableModel.getValueAt(row,1);
-				        		if (!host.equalsIgnoreCase(ip))
-								{
-									domain = new URI("//" + host).getHost();
-									if (domain.equalsIgnoreCase(host))
-									{
-										domain = domain.substring(1 + domain.lastIndexOf(".", domain.lastIndexOf(".")-1));
-									}
+				        		try 
+					        	{
+					        		JTextArea textArea = new JTextArea(30, 75);
+					        	    textArea.setText(shell("whois " + ip));
+					        	    textArea.setEditable(false);
+					        	       
+					        	      // wrap a scrollpane around it
+					        	    JScrollPane scrollPane = new JScrollPane(textArea);
+					        		JOptionPane.showMessageDialog(listview, scrollPane);
+								} catch (HeadlessException | IOException
+										| InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
 								}
-				        	    if (critical.containsKey(ip))
-				        		{
-				        	    	textArea.setText(join (critical.get(ip),"\n"));
-				        		}
-				        	    else if (critical.containsKey(domain))
-				        		{
-				        	    	textArea.setText(join (critical.get(domain),"\n"));
-				        		}
-				        	    else if (critical.containsKey(host))
-				        		{
-				        	    	textArea.setText(join (critical.get(host),"\n"));
-				        		}
-				        	    else
-								{
-									if (!host.equalsIgnoreCase(ip))
+				        	}
+				        	else if (evt.getButton() == MouseEvent.BUTTON2)
+				        	{
+				        		try 
+					        	{
+					        		JTextArea textArea = new JTextArea(30, 75);
+					        		String domain = null; 
+					        		String host = (String) tableModel.getValueAt(row,1);
+					        		if (!host.equalsIgnoreCase(ip))
 									{
-										int i = - 1;
-										while ( (i = host.indexOf('.', i+1)) >= 0)
+										domain = new URI("//" + host).getHost();
+										if (domain.equalsIgnoreCase(host))
 										{
-											domain = host.substring(i+1);
-											if (critical.containsKey(domain))
+											domain = domain.substring(1 + domain.lastIndexOf(".", domain.lastIndexOf(".")-1));
+										}
+									}
+					        	    if (critical.containsKey(ip))
+					        		{
+					        	    	textArea.setText(join (critical.get(ip),"\n"));
+					        		}
+					        	    else if (critical.containsKey(domain))
+					        		{
+					        	    	textArea.setText(join (critical.get(domain),"\n"));
+					        		}
+					        	    else if (critical.containsKey(host))
+					        		{
+					        	    	textArea.setText(join (critical.get(host),"\n"));
+					        		}
+					        	    else
+									{
+										if (!host.equalsIgnoreCase(ip))
+										{
+											int i = - 1;
+											while ( (i = host.indexOf('.', i+1)) >= 0)
 											{
-												textArea.setText(join (critical.get(domain),"\n"));
-												break;
+												domain = host.substring(i+1);
+												if (critical.containsKey(domain))
+												{
+													textArea.setText(join (critical.get(domain),"\n"));
+													break;
+												}
 											}
 										}
 									}
+					        	    textArea.setEditable(false);
+					        	       
+					        	      // wrap a scrollpane around it
+					        	    JScrollPane scrollPane = new JScrollPane(textArea);
+					        		JOptionPane.showMessageDialog(listview, scrollPane);
+								} catch (HeadlessException | URISyntaxException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
 								}
-				        	    textArea.setEditable(false);
-				        	       
-				        	      // wrap a scrollpane around it
-				        	    JScrollPane scrollPane = new JScrollPane(textArea);
-				        		JOptionPane.showMessageDialog(listview, scrollPane);
-							} catch (HeadlessException | URISyntaxException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-			        	}
-			        	else
-			        	{
-			        		try {
-								openWebpage(new URL("http://www.ipvoid.com/scan/"+ ip + "/"));
-							} catch (MalformedURLException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-			        	}
-			        	
+				        	}
+				        	else
+				        	{
+				        		try {
+									openWebpage(new URL("http://www.ipvoid.com/scan/"+ ip + "/"));
+								} catch (MalformedURLException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+				        	}
+				        	
+				        }
 			        }
+				    else if (col == 3)
+				    {
+				    	String log = (String) tableModel.getValueAt(row,3);
+				    	JTextArea textArea = new JTextArea(30, 75);
+		        		textArea.setText(log);
+		        		textArea.setEditable(false);
+		        	    JScrollPane scrollPane = new JScrollPane(textArea);
+		        		JOptionPane.showMessageDialog(listview, scrollPane);
+				    }
 			    }
 			});
 		  File data = new File("/opt/critical-stack/frameworks/intel/master-public.bro.dat");
