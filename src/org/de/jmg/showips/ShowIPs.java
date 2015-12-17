@@ -12,6 +12,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
@@ -72,6 +73,7 @@ import javax.swing.table.DefaultTableModel;
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
+				fc.setDialogTitle("Select log file");
 				  int returnVal = fc.showOpenDialog(button);
 				  if (returnVal == JFileChooser.APPROVE_OPTION) {
 					  String IPADDRESS_PATTERN = 
@@ -305,8 +307,34 @@ import javax.swing.table.DefaultTableModel;
 		  frame.setSize(width, height);
 		  frame.addWindowListener(WinLi);
 		  frame.setVisible(true);
-		  listview.addMouseListener(new java.awt.event.MouseAdapter() {
-			    @Override
+		  listview.addMouseMotionListener(new MouseMotionListener() {
+			
+			@Override
+			public void mouseMoved(MouseEvent evt) {
+				int row = listview.rowAtPoint(evt.getPoint());
+		        int col = listview.columnAtPoint(evt.getPoint());
+		        DefaultTableModel tableModel = (DefaultTableModel) listview.getModel();
+			    String text = (String) tableModel.getValueAt(row,col);
+		        listview.setToolTipText(text);
+			}
+			
+			@Override
+			public void mouseDragged(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		  listview.addMouseListener(new java.awt.event.MouseAdapter() 
+		  {
+			  @Override
+			    public void mouseEntered(java.awt.event.MouseEvent evt) {
+			        int row = listview.rowAtPoint(evt.getPoint());
+			        int col = listview.columnAtPoint(evt.getPoint());
+			        DefaultTableModel tableModel = (DefaultTableModel) listview.getModel();
+				    String text = (String) tableModel.getValueAt(row,col);
+			        listview.setToolTipText(text);
+			  }
+			  @Override
 			    public void mouseClicked(java.awt.event.MouseEvent evt) {
 			        int row = listview.rowAtPoint(evt.getPoint());
 			        int col = listview.columnAtPoint(evt.getPoint());
@@ -399,28 +427,45 @@ import javax.swing.table.DefaultTableModel;
 			        }
 			    }
 			});
-		  try (BufferedReader br = new BufferedReader(new FileReader(new File("/opt/critical-stack/frameworks/intel/master-public.bro.dat")))) {
-				    String line;
-				    while ((line = br.readLine()) != null) {
-				       // process the line.
-				    	if (!line.startsWith("#field"))
-				    	{
-				    		String [] fields = line.split("\\t");
-				    		if (!critical.containsKey(fields[0]))
-				    		{
-				    			critical.put(fields[0], fields);
-				    		}
-				    	}
-				    }
-			}
-			//This is where a real application would open the file.
-          catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+		  File data = new File("/opt/critical-stack/frameworks/intel/master-public.bro.dat");
+		  if (!data.exists())
+		  {
+			  data = new File("//192.168.2.25/critical-stack/frameworks/intel/master-public.bro.dat");  
+		  }
+		  if (!data.exists())
+		  {
+			  fc.setDialogTitle("Select BRO database");
+			  int returnVal = fc.showOpenDialog(listview);
+			  if (returnVal == JFileChooser.APPROVE_OPTION) 
+			  {
+				  data = fc.getSelectedFile();
+			  }
+		  }
+		  if (data.exists())
+		  {
+			  try (BufferedReader br = new BufferedReader(new FileReader(data))) {
+					    String line;
+					    while ((line = br.readLine()) != null) {
+					       // process the line.
+					    	if (!line.startsWith("#field"))
+					    	{
+					    		String [] fields = line.split("\\t");
+					    		if (!critical.containsKey(fields[0]))
+					    		{
+					    			critical.put(fields[0], fields);
+					    		}
+					    	}
+					    }
+				}
+				//This is where a real application would open the file.
+	          catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+		  }
 	  }
 
 	@Override
