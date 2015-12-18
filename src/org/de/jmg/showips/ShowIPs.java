@@ -45,19 +45,21 @@ import javax.swing.JTextArea;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 
-import org.de.jmg.showips.PBDemo.InputConsumer;
-
-public class ShowIPs implements ClipboardOwner, ActionListener {
+public class ShowIPs implements ClipboardOwner, ActionListener
+{
 	public static Frame frame;
 	public static Button button;
 	public static JFileChooser fc = new JFileChooser();
 	public static JTable listview;
-	public static DefaultTableModel model = new DefaultTableModel(new Object[] {
-			"IP", "Host", "Type", "Log" }, 0);
+	public static DefaultTableModel model = new DefaultTableModel(new Object[]
+	{ "IP", "Host", "Type", "Log" }, 0);
 	public static LinkedHashMap<String, String[]> critical = new LinkedHashMap<>();
-	public static ActionListener ActionL = new ActionListener() {
-		class foundIP {
-			public foundIP(String ip, String line) {
+	public static ActionListener ActionL = new ActionListener()
+	{
+		class foundIP
+		{
+			public foundIP(String ip, String line)
+			{
 				this.ip = ip;
 				this.line = line;
 			}
@@ -66,18 +68,21 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 			public String line;
 
 			@Override
-			public String toString() {
+			public String toString()
+			{
 				return ip;
 
 			}
 		}
 
 		@Override
-		public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(ActionEvent e)
+		{
 			// TODO Auto-generated method stub
 			fc.setDialogTitle("Select log file");
 			int returnVal = fc.showOpenDialog(button);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
+			if (returnVal == JFileChooser.APPROVE_OPTION)
+			{
 				final String IPADDRESS_PATTERN = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
 				final String IP6PatternStd = "^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$";
 				final String IP6PatternCompr = "^((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)$";
@@ -90,34 +95,44 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 				File file = fc.getSelectedFile();
 				LinkedHashMap<String, foundIP> ips = new LinkedHashMap<>();
 				try (BufferedReader br = new BufferedReader(
-						new FileReader(file))) {
+						new FileReader(file)))
+				{
 					String line;
-					while ((line = br.readLine()) != null) {
+					while ((line = br.readLine()) != null)
+					{
 						// process the line.
 						Matcher matcher = patternip4.matcher(line);
-						while (matcher.find()) {
-							if (!ips.containsKey(matcher.group())) {
+						while (matcher.find())
+						{
+							if (!ips.containsKey(matcher.group()))
+							{
 								ips.put(matcher.group(),
 										new foundIP(matcher.group(), line));
 							}
 						}
 						matcher = patternip6std.matcher(line);
-						while (matcher.find()) {
-							if (!ips.containsKey(matcher.group())) {
+						while (matcher.find())
+						{
+							if (!ips.containsKey(matcher.group()))
+							{
 								ips.put(matcher.group(),
 										new foundIP(matcher.group(), line));
 							}
 						}
 						matcher = patternip6compr.matcher(line);
-						while (matcher.find()) {
-							if (!ips.containsKey(matcher.group())) {
+						while (matcher.find())
+						{
+							if (!ips.containsKey(matcher.group()))
+							{
 								ips.put(matcher.group(),
 										new foundIP(matcher.group(), line));
 							}
 						}
 						matcher = patternip6alt.matcher(line);
-						while (matcher.find()) {
-							if (!ips.containsKey(matcher.group())) {
+						while (matcher.find())
+						{
+							if (!ips.containsKey(matcher.group()))
+							{
 								ips.put(matcher.group(),
 										new foundIP(matcher.group(), line));
 							}
@@ -125,10 +140,13 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 					}
 				}
 				// This is where a real application would open the file.
-				catch (FileNotFoundException e1) {
+				catch (FileNotFoundException e1)
+				{
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				} catch (IOException e1) {
+				}
+				catch (IOException e1)
+				{
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
@@ -136,11 +154,13 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 				ArrayList<Entry<String, foundIP>> iplist = new ArrayList<>(
 						ips.entrySet());
 				Collections.sort(iplist,
-						new Comparator<Entry<String, foundIP>>() {
+						new Comparator<Entry<String, foundIP>>()
+						{
 
 							@Override
 							public int compare(Entry<String, foundIP> o1,
-									Entry<String, foundIP> o2) {
+									Entry<String, foundIP> o2)
+							{
 								// TODO Auto-generated method stub
 								return o1.getKey().compareToIgnoreCase(
 										o2.getKey());
@@ -150,38 +170,47 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 				StringSelection stringSelection = new StringSelection(output);
 				Clipboard clipboard = Toolkit.getDefaultToolkit()
 						.getSystemClipboard();
-				clipboard.setContents(stringSelection, new ClipboardOwner() {
+				clipboard.setContents(stringSelection, new ClipboardOwner()
+				{
 
 					@Override
 					public void lostOwnership(Clipboard clipboard,
-							Transferable contents) {
+							Transferable contents)
+					{
 						// TODO Auto-generated method stub
 
 					}
 				});
-			} else {
+			}
+			else
+			{
 			}
 		}
 
-		String join(List<Entry<String, foundIP>> list, String conjunction) {
+		String join(List<Entry<String, foundIP>> list, String conjunction)
+		{
 			StringBuilder sb = new StringBuilder();
 			boolean first = true;
 			model.setRowCount(0);
-			for (Entry<String, foundIP> item : list) {
+			for (Entry<String, foundIP> item : list)
+			{
 				if (first)
 					first = false;
 				else
 					sb.append(conjunction);
 				InetAddress addr = null;
 				String line = null;
-				try {
+				try
+				{
 					String domain = null;
 					addr = InetAddress.getByName(item.getKey());
 					frame.setTitle(item.getKey());
 					String host = addr.getHostName();
-					if (!host.equalsIgnoreCase(item.getKey())) {
+					if (!host.equalsIgnoreCase(item.getKey()))
+					{
 						domain = new URI("//" + host).getHost();
-						if (domain != null && domain.equalsIgnoreCase(host)) {
+						if (domain != null && domain.equalsIgnoreCase(host))
+						{
 							domain = domain.substring(1 + domain.lastIndexOf(
 									".", domain.lastIndexOf(".") - 1));
 						}
@@ -189,43 +218,57 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 					String type = "extern";
 					if (addr.isAnyLocalAddress() || addr.isLinkLocalAddress()
 							|| addr.isLoopbackAddress()
-							|| addr.isSiteLocalAddress()) {
+							|| addr.isSiteLocalAddress())
+					{
 						type = "local";
-					} else if (addr.isMCLinkLocal() || addr.isMCNodeLocal()
-							|| addr.isMCOrgLocal() || addr.isMCSiteLocal()) {
+					}
+					else if (addr.isMCLinkLocal() || addr.isMCNodeLocal()
+							|| addr.isMCOrgLocal() || addr.isMCSiteLocal())
+					{
 						type = "multi local";
-					} else if (addr.isMulticastAddress()) {
+					}
+					else if (addr.isMulticastAddress())
+					{
 						type = "multi";
 					}
 					line = item.getKey() + " " + host + " "
 							+ item.getValue().line;
-					if (item.getValue().line.contains("DROP")) {
+					if (item.getValue().line.contains("DROP"))
+					{
 						type += " drop";
 					}
 					if (critical.containsKey(item.getKey())
 							|| critical.containsKey(domain)
-							|| critical.containsKey(host)) {
+							|| critical.containsKey(host))
+					{
 						type += " critical";
-					} else {
-						if (!host.equalsIgnoreCase(item.getKey())) {
+					}
+					else
+					{
+						if (!host.equalsIgnoreCase(item.getKey()))
+						{
 							int i = -1;
-							while ((i = host.indexOf('.', i + 1)) >= 0) {
+							while ((i = host.indexOf('.', i + 1)) >= 0)
+							{
 								domain = host.substring(i + 1);
-								if (critical.containsKey(domain)) {
+								if (critical.containsKey(domain))
+								{
 									type += " critical";
 									break;
 								}
 							}
 						}
 					}
-					model.addRow(new Object[] { item.getKey(), host, type,
-							item.getValue().line });
-				} catch (UnknownHostException | URISyntaxException e1) {
+					model.addRow(new Object[]
+					{ item.getKey(), host, type, item.getValue().line });
+				}
+				catch (UnknownHostException | URISyntaxException e1)
+				{
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 					line = item.getKey() + " " + " " + item.getValue().line;
-					model.addRow(new Object[] { item.getKey(), "invalid", "",
-							item.getValue().line });
+					model.addRow(new Object[]
+					{ item.getKey(), "invalid", "", item.getValue().line });
 
 				}
 				if (line != null)
@@ -237,52 +280,61 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 		}
 
 	};
-	public static WindowListener WinLi = new WindowListener() {
+	public static WindowListener WinLi = new WindowListener()
+	{
 
 		@Override
-		public void windowOpened(WindowEvent e) {
+		public void windowOpened(WindowEvent e)
+		{
 			// TODO Auto-generated method stub
 
 		}
 
 		@Override
-		public void windowIconified(WindowEvent e) {
+		public void windowIconified(WindowEvent e)
+		{
 			// TODO Auto-generated method stub
 
 		}
 
 		@Override
-		public void windowDeiconified(WindowEvent e) {
+		public void windowDeiconified(WindowEvent e)
+		{
 			// TODO Auto-generated method stub
 
 		}
 
 		@Override
-		public void windowDeactivated(WindowEvent e) {
+		public void windowDeactivated(WindowEvent e)
+		{
 			// TODO Auto-generated method stub
 
 		}
 
 		@Override
-		public void windowClosing(WindowEvent e) {
+		public void windowClosing(WindowEvent e)
+		{
 			// TODO Auto-generated method stub
 			System.exit(0);
 		}
 
 		@Override
-		public void windowClosed(WindowEvent e) {
+		public void windowClosed(WindowEvent e)
+		{
 			// TODO Auto-generated method stub
 
 		}
 
 		@Override
-		public void windowActivated(WindowEvent e) {
+		public void windowActivated(WindowEvent e)
+		{
 			// TODO Auto-generated method stub
 
 		}
 	};
 
-	public static void main(String[] args) {
+	public static void main(String[] args)
+	{
 		// Create a file chooser
 		// Create frame with specific title
 		frame = new Frame("ShowIPs");
@@ -303,10 +355,12 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 		frame.setSize(width, height);
 		frame.addWindowListener(WinLi);
 		frame.setVisible(true);
-		listview.addMouseMotionListener(new MouseMotionListener() {
+		listview.addMouseMotionListener(new MouseMotionListener()
+		{
 
 			@Override
-			public void mouseMoved(MouseEvent evt) {
+			public void mouseMoved(MouseEvent evt)
+			{
 				int row = listview.rowAtPoint(evt.getPoint());
 				int col = listview.columnAtPoint(evt.getPoint());
 				DefaultTableModel tableModel = (DefaultTableModel) listview
@@ -316,191 +370,240 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 			}
 
 			@Override
-			public void mouseDragged(MouseEvent arg0) {
+			public void mouseDragged(MouseEvent arg0)
+			{
 				// TODO Auto-generated method stub
 
 			}
 		});
-		listview.addMouseListener(new java.awt.event.MouseAdapter() {
+		listview.addMouseListener(new java.awt.event.MouseAdapter()
+		{
 			@Override
-			public void mousePressed(MouseEvent evt) {
+			public void mousePressed(MouseEvent evt)
+			{
 				final int row = listview.rowAtPoint(evt.getPoint());
 				final int col = listview.columnAtPoint(evt.getPoint());
 				final int Button = evt.getButton();
 				Integer timerinterval = (Integer) Toolkit.getDefaultToolkit()
 						.getDesktopProperty("awt.multiClickInterval");
-				if (evt.getClickCount() == 1) {
+				if (evt.getClickCount() == 1)
+				{
 					doubleclick = false;
-					Timer timer = new Timer(timerinterval,
-							new ActionListener() {
+					Timer timer = new Timer(timerinterval, new ActionListener()
+					{
 
-								@Override
-								public void actionPerformed(ActionEvent ae) {
-									// TODO Auto-generated method stub
-									DefaultTableModel tableModel = (DefaultTableModel) listview
-											.getModel();
-									if (col == 0 || col == 1) {
-										String ip = (String) tableModel
-												.getValueAt(row, 0);
-										if (ip != null) {
-											if (!doubleclick) {
-												if (Button == MouseEvent.BUTTON3) {
-													try {
-														JTextArea textArea = new JTextArea(
-																30, 75);
-														textArea.setText(shell("whois "
-																+ ip));
-														textArea.setEditable(false);
+						@Override
+						public void actionPerformed(ActionEvent ae)
+						{
+							// TODO Auto-generated method stub
+							DefaultTableModel tableModel = (DefaultTableModel) listview
+									.getModel();
+							if (col == 0 || col == 1)
+							{
+								String ip = (String) tableModel.getValueAt(row,
+										0);
+								if (ip != null)
+								{
+									if (!doubleclick)
+									{
+										if (Button == MouseEvent.BUTTON3)
+										{
+											try
+											{
+												JTextArea textArea = new JTextArea(
+														30, 75);
+												textArea.setText(shell("whois "
+														+ ip));
+												textArea.setEditable(false);
 
-														// wrap a scrollpane
-														// around it
-														JScrollPane scrollPane = new JScrollPane(
-																textArea);
-														JOptionPane
-																.showMessageDialog(
-																		listview,
-																		scrollPane);
-													} catch (
-															HeadlessException
-															| IOException
-															| InterruptedException e) {
-														// TODO Auto-generated
-														// catch block
-														e.printStackTrace();
-													}
-												} else if (Button == MouseEvent.BUTTON2) {
-													try {
-														JTextArea textArea = new JTextArea(
-																30, 75);
-														String domain = null;
-														String host = (String) tableModel
-																.getValueAt(
-																		row, 1);
-														if (!host
-																.equalsIgnoreCase(ip)) {
-															domain = new URI(
-																	"//" + host)
-																	.getHost();
-															if (domain
-																	.equalsIgnoreCase(host)) {
-																domain = domain
-																		.substring(1 + domain
-																				.lastIndexOf(
-																						".",
-																						domain.lastIndexOf(".") - 1));
-															}
-														}
-														if (critical
-																.containsKey(ip)) {
-															textArea.setText(join(
-																	critical.get(ip),
-																	"\n"));
-														} else if (critical
-																.containsKey(domain)) {
-															textArea.setText(join(
-																	critical.get(domain),
-																	"\n"));
-														} else if (critical
-																.containsKey(host)) {
-															textArea.setText(join(
-																	critical.get(host),
-																	"\n"));
-														} else {
-															if (!host
-																	.equalsIgnoreCase(ip)) {
-																int i = -1;
-																while ((i = host
-																		.indexOf(
-																				'.',
-																				i + 1)) >= 0) {
-																	domain = host
-																			.substring(i + 1);
-																	if (critical
-																			.containsKey(domain)) {
-																		textArea.setText(join(
-																				critical.get(domain),
-																				"\n"));
-																		break;
-																	}
-																}
-															}
-														}
-														textArea.setEditable(false);
-
-														// wrap a scrollpane
-														// around it
-														JScrollPane scrollPane = new JScrollPane(
-																textArea);
-														JOptionPane
-																.showMessageDialog(
-																		listview,
-																		scrollPane);
-													} catch (
-															HeadlessException
-															| URISyntaxException e) {
-														// TODO Auto-generated
-														// catch block
-														e.printStackTrace();
-													}
-												} else {
-													try {
-														openWebpage(new URL(
-																"http://www.ipvoid.com/scan/"
-																		+ ip
-																		+ "/"));
-													} catch (MalformedURLException e) {
-														// TODO Auto-generated
-														// catch block
-														e.printStackTrace();
+												// wrap a scrollpane
+												// around it
+												JScrollPane scrollPane = new JScrollPane(
+														textArea);
+												JOptionPane.showMessageDialog(
+														listview, scrollPane);
+											}
+											catch (HeadlessException
+													| IOException
+													| InterruptedException e)
+											{
+												// TODO Auto-generated
+												// catch block
+												e.printStackTrace();
+											}
+										}
+										else if (Button == MouseEvent.BUTTON2)
+										{
+											try
+											{
+												JTextArea textArea = new JTextArea(
+														30, 75);
+												String domain = null;
+												String host = (String) tableModel
+														.getValueAt(row, 1);
+												if (!host.equalsIgnoreCase(ip))
+												{
+													domain = new URI("//"
+															+ host).getHost();
+													if (domain
+															.equalsIgnoreCase(host))
+													{
+														domain = domain
+																.substring(1 + domain
+																		.lastIndexOf(
+																				".",
+																				domain.lastIndexOf(".") - 1));
 													}
 												}
-											} else if (doubleclick) {
-												//PBDemo Terminal = new PBDemo(
-												//		"blcheck", ip);
-												int exitCode = 0;
-									            ProcessBuilder pb = new ProcessBuilder("xterm","-hold","-e","bash", "blcheck", ip);
-									            pb.redirectError();
-									            try {
-									                Process pro = pb.start();
-									                exitCode = pro.waitFor();
+												if (critical.containsKey(ip))
+												{
+													textArea.setText(join(
+															critical.get(ip),
+															"\n"));
+												}
+												else if (critical
+														.containsKey(domain))
+												{
+													textArea.setText(join(
+															critical.get(domain),
+															"\n"));
+												}
+												else if (critical
+														.containsKey(host))
+												{
+													textArea.setText(join(
+															critical.get(host),
+															"\n"));
+												}
+												else
+												{
+													if (!host
+															.equalsIgnoreCase(ip))
+													{
+														int i = -1;
+														while ((i = host
+																.indexOf('.',
+																		i + 1)) >= 0)
+														{
+															domain = host
+																	.substring(i + 1);
+															if (critical
+																	.containsKey(domain))
+															{
+																textArea.setText(join(
+																		critical.get(domain),
+																		"\n"));
+																break;
+															}
+														}
+													}
+												}
+												textArea.setEditable(false);
 
-									            } catch (Exception e) {
-									                System.out.println("sorry" + e);
-									            }
+												// wrap a scrollpane
+												// around it
+												JScrollPane scrollPane = new JScrollPane(
+														textArea);
+												JOptionPane.showMessageDialog(
+														listview, scrollPane);
+											}
+											catch (HeadlessException
+													| URISyntaxException e)
+											{
+												// TODO Auto-generated
+												// catch block
+												e.printStackTrace();
+											}
+										}
+										else
+										{
+											try
+											{
+												openWebpage(new URL(
+														"http://www.ipvoid.com/scan/"
+																+ ip + "/"));
+											}
+											catch (MalformedURLException e)
+											{
+												// TODO Auto-generated
+												// catch block
+												e.printStackTrace();
+											}
+										}
+									}
+									else if (doubleclick)
+									{
+										// PBDemo Terminal = new PBDemo(
+										// "blcheck", ip);
+										if (!OSValidator.isWindows())
+										{
+											JOptionPane
+													.showMessageDialog(
+															listview,
+															"This function is not available \non Windows!");
+										}
+										else
+										{
+											int exitCode = 0;
+											ProcessBuilder pb = new ProcessBuilder(
+													"xterm", "-hold", "-e",
+													"bash", "blcheck", ip);
+											// pb.redirectError();
+											try
+											{
+												Process pro = pb.start();
+												exitCode = pro.waitFor();
 
 											}
-
+											catch (Exception e)
+											{
+												System.out.println("sorry" + e);
+												JOptionPane
+												.showMessageDialog(
+														listview,
+														e.getMessage());
+									
+											}
 										}
-									} else if (col == 3) {
-										String log = (String) tableModel
-												.getValueAt(row, 3);
-										JTextArea textArea = new JTextArea(30,
-												75);
-										textArea.setText(log);
-										textArea.setEditable(false);
-										JScrollPane scrollPane = new JScrollPane(
-												textArea);
-										JOptionPane.showMessageDialog(listview,
-												scrollPane);
+
 									}
 
-									if (doubleclick) {
-										doubleclick = false;
-									}
 								}
+							}
+							else if (col == 3)
+							{
+								String log = (String) tableModel.getValueAt(
+										row, 3);
+								JTextArea textArea = new JTextArea(30, 75);
+								textArea.setText(log);
+								textArea.setEditable(false);
+								JScrollPane scrollPane = new JScrollPane(
+										textArea);
+								JOptionPane.showMessageDialog(listview,
+										scrollPane);
+							}
 
-							});
+							if (doubleclick)
+							{
+								doubleclick = false;
+							}
+						}
+
+					});
 					timer.setRepeats(false);
 					timer.start();
 
-				} else if (evt.getClickCount() > 1) {
+				}
+				else if (evt.getClickCount() > 1)
+				{
 					doubleclick = true;
 				}
 
 			}
 
 			@Override
-			public void mouseEntered(java.awt.event.MouseEvent evt) {
+			public void mouseEntered(java.awt.event.MouseEvent evt)
+			{
 				int row = listview.rowAtPoint(evt.getPoint());
 				int col = listview.columnAtPoint(evt.getPoint());
 				DefaultTableModel tableModel = (DefaultTableModel) listview
@@ -512,41 +615,53 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 			boolean doubleclick;
 
 			@Override
-			public void mouseClicked(java.awt.event.MouseEvent evt) {
+			public void mouseClicked(java.awt.event.MouseEvent evt)
+			{
 
 			}
 		});
 		File data = new File(
 				"/opt/critical-stack/frameworks/intel/master-public.bro.dat");
-		if (!data.exists()) {
+		if (!data.exists())
+		{
 			data = new File(
 					"//192.168.2.25/critical-stack/frameworks/intel/master-public.bro.dat");
 		}
-		if (!data.exists()) {
+		if (!data.exists())
+		{
 			fc.setDialogTitle("Select BRO database");
 			int returnVal = fc.showOpenDialog(listview);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
+			if (returnVal == JFileChooser.APPROVE_OPTION)
+			{
 				data = fc.getSelectedFile();
 			}
 		}
-		if (data.exists()) {
-			try (BufferedReader br = new BufferedReader(new FileReader(data))) {
+		if (data.exists())
+		{
+			try (BufferedReader br = new BufferedReader(new FileReader(data)))
+			{
 				String line;
-				while ((line = br.readLine()) != null) {
+				while ((line = br.readLine()) != null)
+				{
 					// process the line.
-					if (!line.startsWith("#field")) {
+					if (!line.startsWith("#field"))
+					{
 						String[] fields = line.split("\\t");
-						if (!critical.containsKey(fields[0])) {
+						if (!critical.containsKey(fields[0]))
+						{
 							critical.put(fields[0], fields);
 						}
 					}
 				}
 			}
 			// This is where a real application would open the file.
-			catch (FileNotFoundException e1) {
+			catch (FileNotFoundException e1)
+			{
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			} catch (IOException e1) {
+			}
+			catch (IOException e1)
+			{
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -554,19 +669,22 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 	}
 
 	@Override
-	public void lostOwnership(Clipboard clipboard, Transferable contents) {
+	public void lostOwnership(Clipboard clipboard, Transferable contents)
+	{
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e)
+	{
 		// TODO Auto-generated method stub
 
 	}
 
 	public static String shell(String cmd) throws IOException,
-			InterruptedException {
+			InterruptedException
+	{
 		Process p = Runtime.getRuntime().exec(cmd);
 		p.waitFor();
 
@@ -575,37 +693,49 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 
 		String line = "";
 		StringBuilder sb = new StringBuilder();
-		while ((line = reader.readLine()) != null) {
+		while ((line = reader.readLine()) != null)
+		{
 			sb.append(line + "\n");
 		}
 		return sb.toString();
 
 	}
 
-	public static void openWebpage(URI uri) {
+	public static void openWebpage(URI uri)
+	{
 		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop()
 				: null;
-		if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-			try {
+		if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE))
+		{
+			try
+			{
 				desktop.browse(uri);
-			} catch (Exception e) {
+			}
+			catch (Exception e)
+			{
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public static void openWebpage(URL url) {
-		try {
+	public static void openWebpage(URL url)
+	{
+		try
+		{
 			openWebpage(url.toURI());
-		} catch (URISyntaxException e) {
+		}
+		catch (URISyntaxException e)
+		{
 			e.printStackTrace();
 		}
 	}
 
-	public static String join(String[] list, String conjunction) {
+	public static String join(String[] list, String conjunction)
+	{
 		StringBuilder sb = new StringBuilder();
 		boolean first = true;
-		for (String item : list) {
+		for (String item : list)
+		{
 			if (first)
 				first = false;
 			else
