@@ -26,8 +26,8 @@ public class StatusColumnCellRenderer extends DefaultTableCellRenderer {
 	    	l.setForeground(Color.BLACK);
 		    if (type.equalsIgnoreCase("extern")) 
 		    {
-		      l.setBackground(Color.RED);
-		      l.setForeground(Color.WHITE);
+		      l.setBackground(Color.decode("#F0CCCC"));
+		      //l.setForeground(Color.WHITE);
 		    } 
 	    	else if (type.equalsIgnoreCase("local")) 
 	    	{
