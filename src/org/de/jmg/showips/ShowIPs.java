@@ -78,74 +78,8 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 			fc.setDialogTitle("Select log file");
 			int returnVal = fc.showOpenDialog(button);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				final String IPADDRESS_PATTERN = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
-				final String IP6PatternStd = "^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$";
-				final String IP6PatternCompr = "^((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)$";
-				final String IP6PatternAlt = "(?<![[:alnum:]]|[[:alnum:]]:)(?:(?:[a-f0-9]{1,4}:){7}[a-f0-9]{1,4}|(?:[a-f0-9]{1,4}:){1,6}:(?:[a-f0-9]{1,4}:){0,5}[a-f0-9]{1,4})(?![[:alnum:]]:?)";
-				final Pattern patternip4 = Pattern.compile(IPADDRESS_PATTERN);
-				final Pattern patternip6std = Pattern.compile(IP6PatternStd);
-				final Pattern patternip6compr = Pattern
-						.compile(IP6PatternCompr);
-				final Pattern patternip6alt = Pattern.compile(IP6PatternAlt);
 				File file = fc.getSelectedFile();
-				LinkedHashMap<String, foundIP> ips = new LinkedHashMap<>();
-				try (BufferedReader br = new BufferedReader(
-						new FileReader(file))) {
-					String line;
-					while ((line = br.readLine()) != null) {
-						// process the line.
-						Matcher matcher = patternip4.matcher(line);
-						while (matcher.find()) {
-							if (!ips.containsKey(matcher.group())) {
-								ips.put(matcher.group(),
-										new foundIP(matcher.group(), line));
-							}
-						}
-						matcher = patternip6std.matcher(line);
-						while (matcher.find()) {
-							if (!ips.containsKey(matcher.group())) {
-								ips.put(matcher.group(),
-										new foundIP(matcher.group(), line));
-							}
-						}
-						matcher = patternip6compr.matcher(line);
-						while (matcher.find()) {
-							if (!ips.containsKey(matcher.group())) {
-								ips.put(matcher.group(),
-										new foundIP(matcher.group(), line));
-							}
-						}
-						matcher = patternip6alt.matcher(line);
-						while (matcher.find()) {
-							if (!ips.containsKey(matcher.group())) {
-								ips.put(matcher.group(),
-										new foundIP(matcher.group(), line));
-							}
-						}
-					}
-				}
-				// This is where a real application would open the file.
-				catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-
-				ArrayList<Entry<String, foundIP>> iplist = new ArrayList<>(
-						ips.entrySet());
-				Collections.sort(iplist,
-						new Comparator<Entry<String, foundIP>>() {
-
-							@Override
-							public int compare(Entry<String, foundIP> o1,
-									Entry<String, foundIP> o2) {
-								// TODO Auto-generated method stub
-								return o1.getKey().compareToIgnoreCase(
-										o2.getKey());
-							}
-						});
+				ArrayList<Entry<String, foundIP>> iplist = parsefile(file);
 				String output = join(iplist, "\n");
 				StringSelection stringSelection = new StringSelection(output);
 				Clipboard clipboard = Toolkit.getDefaultToolkit()
@@ -162,12 +96,131 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 			} else {
 			}
 		}
+		private ArrayList<Entry<String, foundIP>> parsefile (File file)
+		{
+			final String IPADDRESS_PATTERN = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+			final String IP6PatternStd = "(^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})";
+			final String IP6PatternCompr = "(^((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?))";
+			final String IP6PatternAlt = "(?<![[:alnum:]]|[[:alnum:]]:)(?:(?:[a-f0-9]{1,4}:){7}[a-f0-9]{1,4}|(?:[a-f0-9]{1,4}:){1,6}:(?:[a-f0-9]{1,4}:){0,5}[a-f0-9]{1,4})(?![[:alnum:]]:?)";
+			final Pattern patternip4 = Pattern.compile(IPADDRESS_PATTERN);
+			final Pattern patternip6std = Pattern.compile(IP6PatternStd);
+			final Pattern patternip6compr = Pattern
+					.compile(IP6PatternCompr);
+			final Pattern patternip6alt = Pattern.compile(IP6PatternAlt);
+			LinkedHashMap<String, foundIP> ips = new LinkedHashMap<>();
+			frame.setTitle("searching ips");
+			int ii = 0;
+			try (BufferedReader br = new BufferedReader(
+					new FileReader(file))) {
+				String line;
+				while ((line = br.readLine()) != null) {
+					// process the line.
+					String foundIP = "";
+					Matcher matcher = patternip4.matcher(line);
+					ii++;
+					while (matcher.find()) {
+						if (!foundIP.equalsIgnoreCase(matcher.group()))
+						{
+							foundIP = matcher.group();
+							if (!ips.containsKey(foundIP)) 
+							{
+								ips.put(foundIP,
+										new foundIP(foundIP, line));
+							}
+							else
+							{
+								ips.get(foundIP).line += "\n" + line;
+							}
+						}
+					}
+					matcher = patternip6std.matcher(line);
+					while (matcher.find()) {
+						if (!foundIP.equalsIgnoreCase(matcher.group()))
+						{
+							foundIP = matcher.group();
+							if (!ips.containsKey(foundIP)) 
+							{
+								ips.put(foundIP,
+										new foundIP(foundIP, line));
+							}
+							else
+							{
+								ips.get(foundIP).line += "\n" + line;
+							}
+						}
+					}
+					matcher = patternip6compr.matcher(line);
+					while (matcher.find()) {
+						if (!foundIP.equalsIgnoreCase(matcher.group()))
+						{
+							foundIP = matcher.group();
+							if (!ips.containsKey(foundIP)) 
+							{
+								ips.put(foundIP,
+										new foundIP(foundIP, line));
+							}
+							else
+							{
+								ips.get(foundIP).line += "\n" + line;
+							}
+						}
+					}
+					matcher = patternip6alt.matcher(line);
+					while (matcher.find()) {
+						if (!foundIP.equalsIgnoreCase(matcher.group()))
+						{
+							foundIP = matcher.group();
+							if (!ips.containsKey(foundIP)) 
+							{
+								ips.put(foundIP,
+										new foundIP(foundIP, line));
+							}
+							else
+							{
+								ips.get(foundIP).line += "\n" + line;
+							}
+						}
+					}
+					if (ii % 100 == 0)
+					{
+						frame.setTitle("read " + ii); 
+					}
+					
+				}
+			}
+			// This is where a real application would open the file.
+			catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			ArrayList<Entry<String, foundIP>> iplist = new ArrayList<>(
+					ips.entrySet());
+			Collections.sort(iplist,
+					new Comparator<Entry<String, foundIP>>() {
+
+						@Override
+						public int compare(Entry<String, foundIP> o1,
+								Entry<String, foundIP> o2) {
+							// TODO Auto-generated method stub
+							return o1.getKey().compareToIgnoreCase(
+									o2.getKey());
+						}
+					});
+			return iplist;
+		}
 
 		String join(List<Entry<String, foundIP>> list, String conjunction) {
 			StringBuilder sb = new StringBuilder();
 			boolean first = true;
 			model.setRowCount(0);
+			int ii = 0;
+			int count = list.size();
 			for (Entry<String, foundIP> item : list) {
+				ii++;
 				if (first)
 					first = false;
 				else
@@ -177,8 +230,8 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 				try {
 					String domain = null;
 					addr = InetAddress.getByName(item.getKey());
-					frame.setTitle(item.getKey());
 					String host = addr.getHostName();
+					frame.setTitle("found host:" + host + " " + ii + "(" + count + ")");
 					if (!host.equalsIgnoreCase(item.getKey())) {
 						domain = new URI("//" + host).getHost();
 						if (domain != null && domain.equalsIgnoreCase(host)) {
@@ -457,12 +510,12 @@ public class ShowIPs implements ClipboardOwner, ActionListener {
 											} else if (doubleclick) {
 												//PBDemo Terminal = new PBDemo(
 												//		"blcheck", ip);
-												int exitCode = 0;
+												//int exitCode = 0;
 									            ProcessBuilder pb = new ProcessBuilder("xterm","-hold","-e","bash", "blcheck", ip);
 									            pb.redirectError();
 									            try {
 									                Process pro = pb.start();
-									                exitCode = pro.waitFor();
+									                //exitCode = pro.waitFor();
 
 									            } catch (Exception e) {
 									                System.out.println("sorry" + e);
