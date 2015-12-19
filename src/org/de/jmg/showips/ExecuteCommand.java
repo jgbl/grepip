@@ -17,11 +17,11 @@ import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-public class PBDemo {
+public class ExecuteCommand {
 
     public String cmd;
     public String args;
-    public PBDemo(final String cmd, final String args) 
+    public ExecuteCommand(final String cmd, final String args) 
         {
     	this.cmd = cmd;
     	this.args = args;
