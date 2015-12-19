@@ -121,15 +121,18 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			try (BufferedReader br = new BufferedReader(
 					new FileReader(file))) {
 				String line;
+				ArrayList <String> foundips = new ArrayList<>();
 				while ((line = br.readLine()) != null) {
 					// process the line.
 					String foundIP = "";
+					foundips.clear();
 					Matcher matcher = patternip4.matcher(line);
 					ii++;
 					while (matcher.find()) {
-						if (!foundIP.equalsIgnoreCase(matcher.group()))
+						if (!foundips.contains(matcher.group()))
 						{
 							foundIP = matcher.group();
+							foundips.add(foundIP);
 							if (!ips.containsKey(foundIP)) 
 							{
 								ips.put(foundIP,
@@ -143,9 +146,10 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 					}
 					matcher = patternip6std.matcher(line);
 					while (matcher.find()) {
-						if (!foundIP.equalsIgnoreCase(matcher.group()))
+						if (!foundips.contains(matcher.group()))
 						{
 							foundIP = matcher.group();
+							foundips.add(foundIP);
 							if (!ips.containsKey(foundIP)) 
 							{
 								ips.put(foundIP,
@@ -159,9 +163,10 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 					}
 					matcher = patternip6compr.matcher(line);
 					while (matcher.find()) {
-						if (!foundIP.equalsIgnoreCase(matcher.group()))
+						if (!foundips.contains(matcher.group()))
 						{
 							foundIP = matcher.group();
+							foundips.add(foundIP);
 							if (!ips.containsKey(foundIP)) 
 							{
 								ips.put(foundIP,
@@ -175,9 +180,10 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 					}
 					matcher = patternip6alt.matcher(line);
 					while (matcher.find()) {
-						if (!foundIP.equalsIgnoreCase(matcher.group()))
+						if (!foundips.contains(matcher.group()))
 						{
 							foundIP = matcher.group();
+							foundips.add(foundIP);
 							if (!ips.containsKey(foundIP)) 
 							{
 								ips.put(foundIP,
