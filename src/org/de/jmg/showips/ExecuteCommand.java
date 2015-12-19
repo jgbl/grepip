@@ -17,125 +17,154 @@ import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-public class ExecuteCommand {
+public class ExecuteCommand
+{
 
-    public String cmd;
-    public String args;
-    public ExecuteCommand(final String cmd, final String args) 
-        {
-    	this.cmd = cmd;
-    	this.args = args;
-        EventQueue.invokeLater(new Runnable() 
-        {
-            @Override
-            public void run() 
-            {
-                try 
-                {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-                }
+	public String cmd;
+	public String args;
 
-                JFrame frame = new JFrame(cmd);
-                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                frame.setLayout(new BorderLayout());
-                frame.add(new TestPane());
-                frame.pack();
-                frame.setLocationRelativeTo(null);
-                frame.setVisible(true);
-            }
-        });
-    }
+	public ExecuteCommand(final String cmd, final String args)
+	{
+		this.cmd = cmd;
+		this.args = args;
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				try
+				{
+					UIManager.setLookAndFeel(UIManager
+							.getSystemLookAndFeelClassName());
+				}
+				catch (ClassNotFoundException | InstantiationException
+						| IllegalAccessException
+						| UnsupportedLookAndFeelException ex)
+				{
+				}
 
-    public class TestPane extends JPanel {
+				JFrame frame = new JFrame(cmd);
+				frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				frame.setLayout(new BorderLayout());
+				frame.add(new TestPane());
+				frame.pack();
+				frame.setLocationRelativeTo(null);
+				frame.setVisible(true);
+			}
+		});
+	}
 
-        public TestPane() {
-            setLayout(new BorderLayout());
-            JTextArea ta = new JTextArea(40,80);
-            add(new JScrollPane(ta));
+	public class TestPane extends JPanel
+	{
 
-            new ProcessWorker(ta).execute();
-        }
+		public TestPane()
+		{
+			setLayout(new BorderLayout());
+			JTextArea ta = new JTextArea(40, 80);
+			add(new JScrollPane(ta));
 
-        @Override
-        public Dimension getPreferredSize() {
-            return new Dimension(400, 400);
-        }
-    }
+			new ProcessWorker(ta).execute();
+		}
 
-    public interface Consumer {
-        public void consume(String value);            
-    }
+		@Override
+		public Dimension getPreferredSize()
+		{
+			return new Dimension(400, 400);
+		}
+	}
 
-    public class ProcessWorker extends SwingWorker<Integer, String> implements Consumer {
+	public interface Consumer
+	{
+		public void consume(String value);
+	}
 
-        private JTextArea textArea;
+	public class ProcessWorker extends SwingWorker<Integer, String> implements
+			Consumer
+	{
 
-        public ProcessWorker(JTextArea textArea) {
-            this.textArea = textArea;
-        }
+		private JTextArea textArea;
 
-        @Override
-        protected void process(List<String> chunks) {
-            for (String value : chunks) {
-                textArea.append(value);
-            }
-        }
+		public ProcessWorker(JTextArea textArea)
+		{
+			this.textArea = textArea;
+		}
 
-        @Override
-        protected Integer doInBackground() throws Exception {
-            // Forced delay to allow the screen to update
-            Thread.sleep(5000);
-            publish("Starting...\n");
-            int exitCode = 0;
-            ProcessBuilder pb = new ProcessBuilder("bash", cmd, args);
-            //pb.directory(new File("C:\\DevWork\\personal\\java\\projects\\wip\\StackOverflow\\HelloWorld\\dist"));
-            pb.redirectError();
-            try {
-                Process pro = pb.start();
-                InputConsumer ic = new InputConsumer(pro.getInputStream(), this);
-                System.out.println("...Waiting");
-                exitCode = pro.waitFor();
+		@Override
+		protected void process(List<String> chunks)
+		{
+			for (String value : chunks)
+			{
+				textArea.append(value);
+			}
+		}
 
-                ic.join();
+		@Override
+		protected Integer doInBackground() throws Exception
+		{
+			// Forced delay to allow the screen to update
+			Thread.sleep(5000);
+			publish("Starting...\n");
+			int exitCode = 0;
+			ProcessBuilder pb = new ProcessBuilder("bash", cmd, args);
+			// pb.directory(new
+			// File("C:\\DevWork\\personal\\java\\projects\\wip\\StackOverflow\\HelloWorld\\dist"));
+			pb.redirectError();
+			try
+			{
+				Process pro = pb.start();
+				InputConsumer ic = new InputConsumer(pro.getInputStream(), this);
+				System.out.println("...Waiting");
+				exitCode = pro.waitFor();
 
-                System.out.println("Process exited with " + exitCode + "\n");
+				ic.join();
 
-            } catch (Exception e) {
-                System.out.println("sorry" + e);
-            }
-            publish("Process exited with " + exitCode);
-            return exitCode;
-        }
+				System.out.println("Process exited with " + exitCode + "\n");
 
-        @Override
-        public void consume(String value) {
-            publish(value);
-        }
-    }
+			}
+			catch (Exception e)
+			{
+				System.out.println("sorry" + e);
+			}
+			publish("Process exited with " + exitCode);
+			return exitCode;
+		}
 
-    public static class InputConsumer extends Thread {
+		@Override
+		public void consume(String value)
+		{
+			publish(value);
+		}
+	}
 
-        private InputStream is;
-        private Consumer consumer;
+	public static class InputConsumer extends Thread
+	{
 
-        public InputConsumer(InputStream is, Consumer consumer) {
-            this.is = is;
-            this.consumer = consumer;
-            start();
-        }
+		private InputStream is;
+		private Consumer consumer;
 
-        @Override
-        public void run() {
-            try {
-                int in = -1;
-                while ((in = is.read()) != -1) {
-//                    System.out.print((char) in);
-                    consumer.consume(Character.toString((char)in));
-                }
-            } catch (IOException exp) {
-                exp.printStackTrace();
-            }
-        }
-    }
+		public InputConsumer(InputStream is, Consumer consumer)
+		{
+			this.is = is;
+			this.consumer = consumer;
+			start();
+		}
+
+		@Override
+		public void run()
+		{
+			try
+			{
+				int in = -1;
+				while ((in = is.read()) != -1)
+				{
+					// System.out.print((char) in);
+					consumer.consume(Character.toString((char) in));
+				}
+			}
+			catch (IOException exp)
+			{
+				exp.printStackTrace();
+			}
+		}
+	}
 }
