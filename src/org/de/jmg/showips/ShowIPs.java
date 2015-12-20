@@ -125,83 +125,88 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 				ArrayList<String> foundips = new ArrayList<>();
 				while ((line = br.readLine()) != null)
 				{
-					// process the line.
-					String foundIP = "";
-					foundips.clear();
-					Matcher matcher = patternip4.matcher(line);
-					ii++;
-					while (matcher.find())
+					if (line.length() > 3)
 					{
-						if (!foundips.contains(matcher.group()))
+						// process the line.
+						String foundIP = "";
+						foundips.clear();
+						Matcher matcher = patternip4.matcher(line);
+						ii++;
+						while (matcher.find())
 						{
-							foundIP = matcher.group();
-							foundips.add(foundIP);
-							if (!ips.containsKey(foundIP))
+							if (!foundips.contains(matcher.group()))
 							{
-								ips.put(foundIP, new foundIP(foundIP, line));
-							}
-							else
-							{
-								ips.get(foundIP).line += "\n" + line;
+								foundIP = matcher.group();
+								foundips.add(foundIP);
+								if (!ips.containsKey(foundIP))
+								{
+									ips.put(foundIP, new foundIP(foundIP, line));
+								}
+								else
+								{
+									ips.get(foundIP).line += "\n" + line;
+								}
 							}
 						}
-					}
-					matcher = patternip6std.matcher(line);
-					while (matcher.find())
-					{
-						if (!foundips.contains(matcher.group()))
+						matcher = patternip6std.matcher(line);
+						while (matcher.find())
 						{
-							foundIP = matcher.group();
-							foundips.add(foundIP);
-							if (!ips.containsKey(foundIP))
+							if (!foundips.contains(matcher.group()))
 							{
-								ips.put(foundIP, new foundIP(foundIP, line));
-							}
-							else
-							{
-								ips.get(foundIP).line += "\n" + line;
+								foundIP = matcher.group();
+								foundips.add(foundIP);
+								if (!ips.containsKey(foundIP))
+								{
+									ips.put(foundIP, new foundIP(foundIP, line));
+								}
+								else
+								{
+									ips.get(foundIP).line += "\n" + line;
+								}
 							}
 						}
-					}
-					matcher = patternip6compr.matcher(line);
-					while (matcher.find())
-					{
-						if (!foundips.contains(matcher.group()))
+						matcher = patternip6compr.matcher(line);
+						while (matcher.find())
 						{
-							foundIP = matcher.group();
-							foundips.add(foundIP);
-							if (!ips.containsKey(foundIP))
+							if (!foundips.contains(matcher.group()))
 							{
-								ips.put(foundIP, new foundIP(foundIP, line));
-							}
-							else
-							{
-								ips.get(foundIP).line += "\n" + line;
+								foundIP = matcher.group();
+								foundips.add(foundIP);
+								if (!ips.containsKey(foundIP))
+								{
+									ips.put(foundIP, new foundIP(foundIP, line));
+								}
+								else
+								{
+									ips.get(foundIP).line += "\n" + line;
+								}
 							}
 						}
-					}
-					matcher = patternip6alt.matcher(line);
-					while (matcher.find())
-					{
-						if (!foundips.contains(matcher.group()))
+						matcher = patternip6alt.matcher(line);
+						while (matcher.find())
 						{
-							foundIP = matcher.group();
-							foundips.add(foundIP);
-							if (!ips.containsKey(foundIP))
+							if (!foundips.contains(matcher.group()))
 							{
-								ips.put(foundIP, new foundIP(foundIP, line));
-							}
-							else
-							{
-								ips.get(foundIP).line += "\n" + line;
+								foundIP = matcher.group();
+								foundips.add(foundIP);
+								if (!ips.containsKey(foundIP))
+								{
+									ips.put(foundIP, new foundIP(foundIP, line));
+								}
+								else
+								{
+									ips.get(foundIP).line += "\n" + line;
+								}
 							}
 						}
-					}
-					if (ii % 100 == 0)
-					{
-						frame.setTitle("read " + ii);
-					}
+						if (ii % 100 == 0)
+						{
+							frame.setTitle("read " + ii);
+						}
 
+						
+					}
+					
 				}
 			}
 			// This is where a real application would open the file.
