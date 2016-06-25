@@ -52,7 +52,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 	public static JFileChooser fc = new JFileChooser();
 	public static JTable listview;
 	public static DefaultTableModel model = new DefaultTableModel(new Object[] {
-			"IP", "Host", "Type", "Log" }, 0);
+			"IP", "Host", "Type", "Log", "Count" }, 0);
 	public static LinkedHashMap<String, String[]> critical = new LinkedHashMap<>();
 	public static ActionListener ActionL = new ActionListener()
 	{
@@ -62,10 +62,12 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			{
 				this.ip = ip;
 				this.line = line;
+				count += 1;
 			}
 
 			public String ip;
 			public String line;
+			public int count;
 
 			@Override
 			public String toString()
@@ -145,6 +147,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								else
 								{
 									ips.get(foundIP).line += "\n" + line;
+									ips.get(foundIP).count += 1;
 								}
 							}
 						}
@@ -162,6 +165,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								else
 								{
 									ips.get(foundIP).line += "\n" + line;
+									ips.get(foundIP).count += 1;
 								}
 							}
 						}
@@ -312,7 +316,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 						}
 					}
 					model.addRow(new Object[] { item.getKey(), host, type,
-							item.getValue().line });
+							item.getValue().line, item.getValue().count });
 				}
 				catch (UnknownHostException | URISyntaxException e1)
 				{
