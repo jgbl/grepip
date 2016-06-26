@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Erstellungszeit: 26. Jun 2016 um 17:29
--- Server Version: 5.5.47-0ubuntu0.14.04.1
--- PHP-Version: 5.5.9-1ubuntu4.14
+-- Generation Time: Jun 26, 2016 at 06:28 PM
+-- Server version: 5.5.49-0ubuntu0.14.04.1
+-- PHP Version: 5.5.9-1ubuntu4.17
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -17,29 +17,28 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Datenbank: `ips`
+-- Database: `ips`
 --
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `ip`
+-- Table structure for table `ip`
 --
 
 CREATE TABLE IF NOT EXISTS `ip` (
   `ID` int(10) unsigned NOT NULL,
   `address` varchar(20) NOT NULL,
   `count` int(10) unsigned NOT NULL DEFAULT '0',
-  `kind` int(10) unsigned NOT NULL,
+  `kind` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`),
-  UNIQUE KEY `address` (`address`),
-  KEY `kind` (`kind`)
+  UNIQUE KEY `address` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `kinds`
+-- Table structure for table `kinds`
 --
 
 CREATE TABLE IF NOT EXISTS `kinds` (
@@ -50,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `kinds` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Daten für Tabelle `kinds`
+-- Dumping data for table `kinds`
 --
 
 INSERT INTO `kinds` (`ID`, `name`) VALUES
@@ -64,7 +63,7 @@ INSERT INTO `kinds` (`ID`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `text`
+-- Table structure for table `text`
 --
 
 CREATE TABLE IF NOT EXISTS `text` (
@@ -72,6 +71,16 @@ CREATE TABLE IF NOT EXISTS `text` (
   `text` text NOT NULL,
   KEY `ipID` (`ipID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `text`
+--
+ALTER TABLE `text`
+  ADD CONSTRAINT `fk_text_ip` FOREIGN KEY (`ipID`) REFERENCES `ip` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
