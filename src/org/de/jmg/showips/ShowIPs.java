@@ -410,7 +410,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 	private static void connecttodatabase() throws SQLException
 	{
 		MysqlDataSource ds = new MysqlDataSource();
-		ds.setUser(JOptionPane.showInputDialog("user"));
+		String user =JOptionPane.showInputDialog("user"); 
 		JPasswordField passwordField = new JPasswordField(10);
         passwordField.setEchoChar('*');
         JOptionPane.showMessageDialog(
@@ -420,10 +420,21 @@ public class ShowIPs implements ClipboardOwner, ActionListener
                 JOptionPane.OK_OPTION);
         String pw = String.valueOf(passwordField.getPassword());
         ds.setPassword(pw);
-		ds.setServerName(JOptionPane.showInputDialog("Server"));
-		ds.setPort(3306);
-		ds.setDatabaseName("ips");
-		conn = ds.getConnection();
+        String server = JOptionPane.showInputDialog("Server");
+		//ds.setServerName(server);
+		//ds.setUser("'" + user + "'@'" + server + "'");
+		ds.setUser(user);
+		//ds.setPort(3306);
+		//ds.setDatabaseName("ips");
+		ds.setURL("jdbc:mysql://" + server +":3306/" + "ips");
+		try
+		{
+			conn = ds.getConnection();
+		}
+		catch (SQLException ex)
+		{
+			JOptionPane.showMessageDialog(null, ex.getMessage());
+		}
 	}
 
 	public static void main(String[] args)

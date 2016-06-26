@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 26, 2016 at 06:28 PM
+-- Generation Time: Jun 26, 2016 at 07:44 PM
 -- Server version: 5.5.49-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.17
 
@@ -19,6 +19,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `ips`
 --
+CREATE DATABASE IF NOT EXISTS `ips` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `ips`;
 
 -- --------------------------------------------------------
 
