@@ -28,6 +28,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,11 +41,15 @@ import java.util.regex.Pattern;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
+
+import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+//import com.mysql.*;
 
 public class ShowIPs implements ClipboardOwner, ActionListener
 {
@@ -51,6 +57,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 	public static Button button;
 	public static JFileChooser fc = new JFileChooser();
 	public static JTable listview;
+	public static Connection conn;
 	public static DefaultTableModel model = new DefaultTableModel(new Object[] {
 			"IP", "Host", "Type", "Log", "Count" }, 0);
 	public static LinkedHashMap<String, String[]> critical = new LinkedHashMap<>();
@@ -387,6 +394,23 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 
 		}
 	};
+	
+	private static void connecttodatabase() throws SQLException
+	{
+		MysqlDataSource ds = new MysqlDataSource();
+		ds.setUser(JOptionPane.showInputDialog("user"));
+		JPasswordField passwordField = new JPasswordField(10);
+        passwordField.setEchoChar('*');
+        JOptionPane.showMessageDialog(
+                null,
+                passwordField,
+                "Enter password",
+                JOptionPane.OK_OPTION);
+        String pw = String.valueOf(passwordField.getPassword());
+        ds.setPassword(pw);
+		ds.setServerName(JOptionPane.showInputDialog("Server"));
+		conn = ds.getConnection();
+	}
 
 	public static void main(String[] args)
 	{
@@ -410,6 +434,15 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 		frame.setSize(width, height);
 		frame.addWindowListener(WinLi);
 		frame.setVisible(true);
+		try 
+		{
+			connecttodatabase();
+		} 
+		catch (SQLException e2) 
+		{
+			// TODO Auto-generated catch block
+			JOptionPane.showMessageDialog(frame, e2.getMessage());
+		}
 		listview.addMouseMotionListener(new MouseMotionListener()
 		{
 
