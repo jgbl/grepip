@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -36,6 +37,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,7 +50,11 @@ import javax.swing.JTextArea;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 
+import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import javax.sql.DataSource;
+
 //import com.mysql.*;
 
 public class ShowIPs implements ClipboardOwner, ActionListener
@@ -421,19 +427,42 @@ public class ShowIPs implements ClipboardOwner, ActionListener
         String pw = String.valueOf(passwordField.getPassword());
         ds.setPassword(pw);
         String server = JOptionPane.showInputDialog("Server");
-		//ds.setServerName(server);
+		ds.setServerName(server);
 		//ds.setUser("'" + user + "'@'" + server + "'");
 		ds.setUser(user);
-		//ds.setPort(3306);
-		//ds.setDatabaseName("ips");
-		ds.setURL("jdbc:mysql://" + server +":3306/" + "ips");
+		ds.setPort(3306);
+		ds.setDatabaseName("ips");
+		//ds.setURL("jdbc:mysql://" + server +":3306/" + "ips");
 		try
 		{
 			conn = ds.getConnection();
 		}
+		catch(MySQLSyntaxErrorException eex)
+		{
+			//JOptionPane.showMessageDialog(null, eex.getErrorCode() + eex.getMessage());
+			if (eex.getErrorCode() == 1049)
+			{
+				ds.setDatabaseName("");
+				conn = ds.getConnection();
+				InputStream is = ShowIPs.class.getResourceAsStream("/resources/file/ips.sql");
+				String sql;
+				Scanner s = new Scanner(is).useDelimiter("\\A");
+				sql = s.hasNext() ? s.next() : "";
+				try {
+					is.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				conn.createStatement().executeQuery(sql);
+				conn.close();
+				ds.setDatabaseName("ips");
+				conn = ds.getConnection();
+			}
+		}
 		catch (SQLException ex)
 		{
-			JOptionPane.showMessageDialog(null, ex.getMessage());
+			throw (ex);
 		}
 	}
 
