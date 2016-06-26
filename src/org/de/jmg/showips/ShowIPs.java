@@ -384,7 +384,19 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 		public void windowClosed(WindowEvent e)
 		{
 			// TODO Auto-generated method stub
-
+			if(conn != null)
+			{
+				try
+				{
+					conn.close();
+				}
+				catch (Exception e1)
+				{
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				conn = null;
+			}
 		}
 
 		@Override
@@ -409,6 +421,8 @@ public class ShowIPs implements ClipboardOwner, ActionListener
         String pw = String.valueOf(passwordField.getPassword());
         ds.setPassword(pw);
 		ds.setServerName(JOptionPane.showInputDialog("Server"));
+		ds.setPort(3306);
+		ds.setDatabaseName("ips");
 		conn = ds.getConnection();
 	}
 
@@ -428,7 +442,6 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 		JScrollPane pane = new JScrollPane(listview);
 		frame.add(pane, BorderLayout.CENTER);
 		frame.add(button, BorderLayout.SOUTH);
-
 		int width = 300;
 		int height = 300;
 		frame.setSize(width, height);
@@ -623,7 +636,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 									{
 										// PBDemo Terminal = new PBDemo(
 										// "blcheck", ip);
-										if (!OSValidator.isWindows())
+										if (OSValidator.isWindows())
 										{
 											JOptionPane
 													.showMessageDialog(
