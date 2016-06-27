@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 26, 2016 at 07:44 PM
+-- Generation Time: Jun 27, 2016 at 09:07 PM
 -- Server version: 5.5.49-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.17
 
@@ -29,13 +29,13 @@ USE `ips`;
 --
 
 CREATE TABLE IF NOT EXISTS `ip` (
-  `ID` int(10) unsigned NOT NULL,
+  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `address` varchar(20) NOT NULL,
   `count` int(10) unsigned NOT NULL DEFAULT '0',
   `kind` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`),
   UNIQUE KEY `address` (`address`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 

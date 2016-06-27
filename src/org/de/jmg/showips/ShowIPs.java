@@ -30,6 +30,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -38,13 +39,11 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -118,7 +117,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			{
 			}
 		}
-		private void parsefileSQL(File file)
+		private ResultSet parsefileSQL(File file)
 		{
 			final String IPADDRESS_PATTERN = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
 			final String IP6PatternStd = "(^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})";
@@ -128,7 +127,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			final Pattern patternip6std = Pattern.compile(IP6PatternStd);
 			final Pattern patternip6compr = Pattern.compile(IP6PatternCompr);
 			final Pattern patternip6alt = Pattern.compile(IP6PatternAlt);
-			LinkedHashMap<String, foundIP> ips = new LinkedHashMap<>();
+			//LinkedHashMap<String, foundIP> ips = new LinkedHashMap<>();
 			frame.setTitle("searching ips");
 			int ii = 0;
 			try (BufferedReader br = new BufferedReader(new FileReader(file)))
@@ -150,9 +149,12 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 							{
 								foundIP = matcher.group();
 								foundips.add(foundIP);
-								if (!ips.containsKey(foundIP))
+								ResultSet r = dbIps.queryIP(foundIP);
+								if (r == null || !r.first())
 								{
-									ips.put(foundIP, new foundIP(foundIP, line));
+									if(r != null) r.close();
+									r = dbIps.InsertIP(foundIP,1,0);
+									dbIps.InsertText(r.getInt("ID"),line);
 								}
 								else
 								{
@@ -248,6 +250,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 					return o1.getKey().compareToIgnoreCase(o2.getKey());
 				}
 			});
+			return null;
 			
 		}
 

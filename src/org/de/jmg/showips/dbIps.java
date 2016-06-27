@@ -3,6 +3,8 @@ package org.de.jmg.showips;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
@@ -40,7 +42,7 @@ public class dbIps
 		{
 			conn = ds.getConnection();
 		}
-		catch(com.mysql.jdbc.exceptions.MySQLSyntaxErrorException|com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException eex)
+		catch(com.mysql.jdbc.exceptions.MySQLSyntaxErrorException eex) //|com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException eex)
 		{
 			//JOptionPane.showMessageDialog(null, eex.getErrorCode() + eex.getMessage());
 			if (eex.getErrorCode() == 1049)
@@ -93,6 +95,42 @@ public class dbIps
 		{
 			if (st != null) st.close();
 		}
+	}
+    static PreparedStatement findIP;
+	public static ResultSet queryIP(String foundIP) throws SQLException {
+		// TODO Auto-generated method stub
+		if (findIP == null)
+		{
+			final String sql = "Select * FROM ip WHERE address = ?";
+		  	findIP = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		}
+		findIP.setString(1, foundIP);
+		return findIP.executeQuery();
+	}
+	static PreparedStatement insertIP;
+	public static ResultSet InsertIP(String foundIP, int count, int kind) throws SQLException {
+		// TODO Auto-generated method stub
+		if (insertIP == null)
+		{
+			final String sql = "INSERT INTO ip (address,count,kind) VALUES(?,?,?)";
+		  	insertIP = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		}
+		insertIP.setString(1, foundIP);
+		insertIP.setInt(2, count);
+		insertIP.setInt(3, kind);
+		return insertIP.executeQuery();
+	}
+	static PreparedStatement insertText;
+	public static ResultSet InsertText(int ID, String text) throws SQLException {
+		// TODO Auto-generated method stub
+		if (insertText == null)
+		{
+			final String sql = "INSERT INTO text (ipID,text) VALUES(?,?)";
+		  	insertText = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		}
+		insertText.setString(2, text);
+		insertText.setInt(1, ID);
+		return insertText.executeQuery();
 	}
 
 	
