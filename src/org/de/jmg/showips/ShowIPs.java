@@ -248,7 +248,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 					return o1.getKey().compareToIgnoreCase(o2.getKey());
 				}
 			});
-			return iplist;
+			
 		}
 
 		private ArrayList<Entry<String, foundIP>> parsefile(File file)

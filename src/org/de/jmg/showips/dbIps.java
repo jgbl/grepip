@@ -10,7 +10,6 @@ import java.util.Scanner;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 
-import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 public class dbIps 
@@ -41,7 +40,7 @@ public class dbIps
 		{
 			conn = ds.getConnection();
 		}
-		catch(MySQLSyntaxErrorException eex)
+		catch(com.mysql.jdbc.exceptions.MySQLSyntaxErrorException|com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException eex)
 		{
 			//JOptionPane.showMessageDialog(null, eex.getErrorCode() + eex.getMessage());
 			if (eex.getErrorCode() == 1049)
