@@ -62,7 +62,6 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 	public static Button button;
 	public static JFileChooser fc = new JFileChooser();
 	public static JTable listview;
-	public static Connection conn;
 	public static DefaultTableModel model = new DefaultTableModel(new Object[] {
 			"IP", "Host", "Type", "Log", "Count" }, 0);
 	public static LinkedHashMap<String, String[]> critical = new LinkedHashMap<>();
@@ -118,6 +117,138 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			else
 			{
 			}
+		}
+		private void parsefileSQL(File file)
+		{
+			final String IPADDRESS_PATTERN = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+			final String IP6PatternStd = "(^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})";
+			final String IP6PatternCompr = "(^((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?))";
+			final String IP6PatternAlt = "(?<![[:alnum:]]|[[:alnum:]]:)(?:(?:[a-f0-9]{1,4}:){7}[a-f0-9]{1,4}|(?:[a-f0-9]{1,4}:){1,6}:(?:[a-f0-9]{1,4}:){0,5}[a-f0-9]{1,4})(?![[:alnum:]]:?)";
+			final Pattern patternip4 = Pattern.compile(IPADDRESS_PATTERN);
+			final Pattern patternip6std = Pattern.compile(IP6PatternStd);
+			final Pattern patternip6compr = Pattern.compile(IP6PatternCompr);
+			final Pattern patternip6alt = Pattern.compile(IP6PatternAlt);
+			LinkedHashMap<String, foundIP> ips = new LinkedHashMap<>();
+			frame.setTitle("searching ips");
+			int ii = 0;
+			try (BufferedReader br = new BufferedReader(new FileReader(file)))
+			{
+				String line;
+				ArrayList<String> foundips = new ArrayList<>();
+				while ((line = br.readLine()) != null)
+				{
+					if (line.length() > 3)
+					{
+						// process the line.
+						String foundIP = "";
+						foundips.clear();
+						Matcher matcher = patternip4.matcher(line);
+						ii++;
+						while (matcher.find())
+						{
+							if (!foundips.contains(matcher.group()))
+							{
+								foundIP = matcher.group();
+								foundips.add(foundIP);
+								if (!ips.containsKey(foundIP))
+								{
+									ips.put(foundIP, new foundIP(foundIP, line));
+								}
+								else
+								{
+									ips.get(foundIP).line += "\n" + line;
+									ips.get(foundIP).count += 1;
+								}
+							}
+						}
+						matcher = patternip6std.matcher(line);
+						while (matcher.find())
+						{
+							if (!foundips.contains(matcher.group()))
+							{
+								foundIP = matcher.group();
+								foundips.add(foundIP);
+								if (!ips.containsKey(foundIP))
+								{
+									ips.put(foundIP, new foundIP(foundIP, line));
+								}
+								else
+								{
+									ips.get(foundIP).line += "\n" + line;
+									ips.get(foundIP).count += 1;
+								}
+							}
+						}
+						matcher = patternip6compr.matcher(line);
+						while (matcher.find())
+						{
+							if (!foundips.contains(matcher.group()))
+							{
+								foundIP = matcher.group();
+								foundips.add(foundIP);
+								if (!ips.containsKey(foundIP))
+								{
+									ips.put(foundIP, new foundIP(foundIP, line));
+								}
+								else
+								{
+									ips.get(foundIP).line += "\n" + line;
+								}
+							}
+						}
+						matcher = patternip6alt.matcher(line);
+						while (matcher.find())
+						{
+							if (!foundips.contains(matcher.group()))
+							{
+								foundIP = matcher.group();
+								foundips.add(foundIP);
+								if (!ips.containsKey(foundIP))
+								{
+									ips.put(foundIP, new foundIP(foundIP, line));
+								}
+								else
+								{
+									ips.get(foundIP).line += "\n" + line;
+								}
+							}
+						}
+						if (ii % 100 == 0)
+						{
+							frame.setTitle("read " + ii);
+						}
+
+						
+					}
+					
+				}
+			}
+			// This is where a real application would open the file.
+			catch (FileNotFoundException e1)
+			{
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			catch (IOException e1)
+			{
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			ArrayList<Entry<String, foundIP>> iplist = new ArrayList<>(
+					ips.entrySet());
+			Collections.sort(iplist, new Comparator<Entry<String, foundIP>>()
+			{
+
+				@Override
+				public int compare(Entry<String, foundIP> o1,
+						Entry<String, foundIP> o2)
+				{
+					// TODO Auto-generated method stub
+					return o1.getKey().compareToIgnoreCase(o2.getKey());
+				}
+			});
+			return iplist;
 		}
 
 		private ArrayList<Entry<String, foundIP>> parsefile(File file)
@@ -389,18 +520,18 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 		public void windowClosed(WindowEvent e)
 		{
 			// TODO Auto-generated method stub
-			if(conn != null)
+			if(dbIps.conn != null)
 			{
 				try
 				{
-					conn.close();
+					dbIps.conn.close();
 				}
 				catch (Exception e1)
 				{
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				conn = null;
+				dbIps.conn = null;
 			}
 		}
 
@@ -412,85 +543,8 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 		}
 	};
 	
-	private static void connecttodatabase() throws SQLException
-	{
-		MysqlDataSource ds = new MysqlDataSource();
-		String user =JOptionPane.showInputDialog("user"); 
-		JPasswordField passwordField = new JPasswordField(10);
-        passwordField.setEchoChar('*');
-        JOptionPane.showMessageDialog(
-                null,
-                passwordField,
-                "Enter password",
-                JOptionPane.OK_OPTION);
-        String pw = String.valueOf(passwordField.getPassword());
-        ds.setPassword(pw);
-        String server = JOptionPane.showInputDialog("Server");
-		ds.setServerName(server);
-		//ds.setUser("'" + user + "'@'" + server + "'");
-		ds.setUser(user);
-		ds.setPort(3306);
-		ds.setDatabaseName("ips");
-		//ds.setURL("jdbc:mysql://" + server +":3306/" + "ips");
-		try
-		{
-			conn = ds.getConnection();
-		}
-		catch(MySQLSyntaxErrorException eex)
-		{
-			//JOptionPane.showMessageDialog(null, eex.getErrorCode() + eex.getMessage());
-			if (eex.getErrorCode() == 1049)
-			{
-				ds.setDatabaseName("");
-				conn = ds.getConnection();
-				InputStream is = ShowIPs.class.getResourceAsStream("/resources/file/ips.sql");
-				importSQL(conn,is);
-				try {
-					is.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				conn.close();
-				ds.setDatabaseName("ips");
-				conn = ds.getConnection();
-			}
-		}
-		catch (SQLException ex)
-		{
-			throw (ex);
-		}
-	}
 	
-	public static void importSQL(Connection conn, InputStream in) throws SQLException
-	{
-		Scanner s = new Scanner(in);
-		s.useDelimiter("(;(\r)?\n)|(--\n)");
-		Statement st = null;
-		try
-		{
-			st = conn.createStatement();
-			while (s.hasNext())
-			{
-				String line = s.next();
-				if (line.startsWith("/*!") && line.endsWith("*/"))
-				{
-					int i = line.indexOf(' ');
-					line = line.substring(i + 1, line.length() - " */".length());
-				}
-
-				if (line.trim().length() > 0)
-				{
-					st.execute(line);
-				}
-			}
-		}
-		finally
-		{
-			if (st != null) st.close();
-		}
-	}
-
+	
 	public static void main(String[] args)
 	{
 		// Create a file chooser
@@ -514,7 +568,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 		frame.setVisible(true);
 		try 
 		{
-			connecttodatabase();
+			dbIps.connecttodatabase();
 		} 
 		catch (SQLException e2) 
 		{
