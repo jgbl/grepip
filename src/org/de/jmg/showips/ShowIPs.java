@@ -40,6 +40,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -54,11 +57,29 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 {
 	public static Frame frame;
 	public static Button button;
+	public static JMenuBar mb;
+	public static JMenu mnudefault;
+	public static JMenuItem mnuClearDB;
 	public static JFileChooser fc = new JFileChooser();
 	public static JTable listview;
 	public static DefaultTableModel model = new DefaultTableModel(new Object[] {
 			"IP", "Host", "Type", "Log", "Count" }, 0);
 	public static LinkedHashMap<String, String[]> critical = new LinkedHashMap<>();
+	public static ActionListener ActionLMenu = new ActionListener()
+	{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			try {
+				dbIps.cleardb();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		
+	};
 	public static ActionListener ActionL = new ActionListener()
 	{
 		class foundIP
@@ -93,9 +114,12 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			{
 				File file = fc.getSelectedFile();
 				ArrayList<Entry<String, foundIP>> iplist = null;
-				try {
-					iplist = parsefileSQL(file);
-				} catch (SQLException e1) {
+				try 
+				{
+					iplist = parsefile(file);
+				} 
+				catch (Exception e1) 
+				{
 					// TODO Auto-generated catch block
 					JOptionPane.showMessageDialog(frame, e1.getMessage());;
 				}
@@ -156,7 +180,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								{
 									if(r != null) r.close();
 									r = dbIps.InsertIP(foundIP,1,0);
-									dbIps.InsertText(r.getInt("ID"),line);
+									if (r.first()) dbIps.InsertText(r.getInt("ID"),line);
 									r.close();
 								}
 								else
@@ -180,7 +204,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								{
 									if(r != null) r.close();
 									r = dbIps.InsertIP(foundIP,1,0);
-									dbIps.InsertText(r.getInt("ID"),line);
+									if (r.first()) dbIps.InsertText(r.getInt("ID"),line);
 									r.close();
 								}
 								else
@@ -204,7 +228,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								{
 									if(r != null) r.close();
 									r = dbIps.InsertIP(foundIP,1,0);
-									dbIps.InsertText(r.getInt("ID"),line);
+									if (r.first()) dbIps.InsertText(r.getInt("ID"),line);
 									r.close();
 								}
 								else
@@ -228,7 +252,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								{
 									if(r != null) r.close();
 									r = dbIps.InsertIP(foundIP,1,0);
-									dbIps.InsertText(r.getInt("ID"),line);
+									if (r.first()) dbIps.InsertText(r.getInt("ID"),line);
 									r.close();
 								}
 								else
@@ -275,7 +299,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 				ip.count = r.getInt("count");
 				ips.put(r.getString("address"), ip);
 			}
-			
+			r.close();
 			ArrayList<Entry<String, foundIP>> iplist = new ArrayList<>(
 					ips.entrySet());
 			
@@ -286,13 +310,15 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 		private ArrayList<Entry<String, foundIP>> parsefile(File file)
 		{
 			final String IPADDRESS_PATTERN = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
-			final String IP6PatternStd = "(^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})";
-			final String IP6PatternCompr = "(^((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?))";
+			final String IP6PatternStd = "((?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})";
+			final String IP6PatternCompr = "(((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?))";
 			final String IP6PatternAlt = "(?<![[:alnum:]]|[[:alnum:]]:)(?:(?:[a-f0-9]{1,4}:){7}[a-f0-9]{1,4}|(?:[a-f0-9]{1,4}:){1,6}:(?:[a-f0-9]{1,4}:){0,5}[a-f0-9]{1,4})(?![[:alnum:]]:?)";
+			final String IP6PatternAll = "(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
 			final Pattern patternip4 = Pattern.compile(IPADDRESS_PATTERN);
 			final Pattern patternip6std = Pattern.compile(IP6PatternStd);
 			final Pattern patternip6compr = Pattern.compile(IP6PatternCompr);
 			final Pattern patternip6alt = Pattern.compile(IP6PatternAlt);
+			final Pattern patternip6all = Pattern.compile(IP6PatternAll);
 			LinkedHashMap<String, foundIP> ips = new LinkedHashMap<>();
 			frame.setTitle("searching ips");
 			int ii = 0;
@@ -321,7 +347,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								}
 								else
 								{
-									ips.get(foundIP).line += "\n" + line;
+									//ips.get(foundIP).line += "\n" + line;
 									ips.get(foundIP).count += 1;
 								}
 							}
@@ -339,7 +365,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								}
 								else
 								{
-									ips.get(foundIP).line += "\n" + line;
+									//ips.get(foundIP).line += "\n" + line;
 									ips.get(foundIP).count += 1;
 								}
 							}
@@ -357,7 +383,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								}
 								else
 								{
-									ips.get(foundIP).line += "\n" + line;
+									//ips.get(foundIP).line += "\n" + line;
 									ips.get(foundIP).count += 1;
 								}
 							}
@@ -375,7 +401,25 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								}
 								else
 								{
-									ips.get(foundIP).line += "\n" + line;
+									//ips.get(foundIP).line += "\n" + line;
+									ips.get(foundIP).count += 1;
+								}
+							}
+						}
+						matcher = patternip6all.matcher(line);
+						while (matcher.find())
+						{
+							if (!foundips.contains(matcher.group()))
+							{
+								foundIP = matcher.group();
+								foundips.add(foundIP);
+								if (!ips.containsKey(foundIP))
+								{
+									ips.put(foundIP, new foundIP(foundIP, line));
+								}
+								else
+								{
+									//ips.get(foundIP).line += "\n" + line;
 									ips.get(foundIP).count += 1;
 								}
 							}
@@ -592,7 +636,12 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 		listview = new JTable(model);
 		listview.getColumnModel().getColumn(0)
 				.setCellRenderer(new StatusColumnCellRenderer());
+		mb = new JMenuBar();
+		//mnuClearDB = new JMenuItem("Clear DB");
+		//mnuClearDB.addActionListener(ActionLMenu);
+		//mb.add(mnuClearDB);
 		JScrollPane pane = new JScrollPane(listview);
+		frame.add(mb, BorderLayout.NORTH);
 		frame.add(pane, BorderLayout.CENTER);
 		frame.add(button, BorderLayout.SOUTH);
 		int width = 300;
@@ -600,7 +649,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 		frame.setSize(width, height);
 		frame.addWindowListener(WinLi);
 		frame.setVisible(true);
-		try 
+		/*try 
 		{
 			dbIps.connecttodatabase();
 		} 
@@ -608,7 +657,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 		{
 			// TODO Auto-generated catch block
 			JOptionPane.showMessageDialog(frame, e2.getMessage());
-		}
+		}*/
 		listview.addMouseMotionListener(new MouseMotionListener()
 		{
 

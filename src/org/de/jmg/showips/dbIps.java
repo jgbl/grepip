@@ -114,7 +114,7 @@ public class dbIps
 		if (insertIP == null)
 		{
 			final String sql = "INSERT INTO ip (address,count,kind) VALUES(?,?,?)";
-		  	insertIP = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		  	insertIP = conn.prepareStatement(sql);
 		}
 		insertIP.setString(1, foundIP);
 		insertIP.setInt(2, count);
@@ -128,7 +128,7 @@ public class dbIps
 		if (insertText == null)
 		{
 			final String sql = "INSERT INTO text (ipID,text) VALUES(?,?)";
-		  	insertText = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
+		  	insertText = conn.prepareStatement(sql);
 		}
 		insertText.setString(2, text);
 		insertText.setInt(1, ID);
@@ -144,5 +144,11 @@ public class dbIps
 	{
 		Statement st = conn.createStatement();
 		return st.executeQuery("Select * from ip ORDER BY address");
+	}
+	public static void cleardb() throws SQLException
+	{
+		Statement st = conn.createStatement();
+		st.execute("DELETE from ip");
+		st.execute("DELETE from text");
 	}
 }
