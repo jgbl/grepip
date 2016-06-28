@@ -119,10 +119,11 @@ public class dbIps
 		insertIP.setString(1, foundIP);
 		insertIP.setInt(2, count);
 		insertIP.setInt(3, kind);
-		return insertIP.executeQuery();
+		insertIP.execute();
+		return queryIP(foundIP);
 	}
 	static PreparedStatement insertText;
-	public static ResultSet InsertText(int ID, String text) throws SQLException {
+	public static void InsertText(int ID, String text) throws SQLException {
 		// TODO Auto-generated method stub
 		if (insertText == null)
 		{
@@ -131,7 +132,8 @@ public class dbIps
 		}
 		insertText.setString(2, text);
 		insertText.setInt(1, ID);
-		return insertText.executeQuery();
+		insertText.execute();
+		//return insertText.executeQuery();
 	}
 	public static ResultSet getAllIpsWithText() throws SQLException
 	{

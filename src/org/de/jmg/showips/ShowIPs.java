@@ -92,7 +92,13 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			if (returnVal == JFileChooser.APPROVE_OPTION)
 			{
 				File file = fc.getSelectedFile();
-				ArrayList<Entry<String, foundIP>> iplist = parsefile(file);
+				ArrayList<Entry<String, foundIP>> iplist = null;
+				try {
+					iplist = parsefileSQL(file);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					JOptionPane.showMessageDialog(frame, e1.getMessage());;
+				}
 				String output = join(iplist, "\n");
 				StringSelection stringSelection = new StringSelection(output);
 				Clipboard clipboard = Toolkit.getDefaultToolkit()
@@ -151,12 +157,14 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 									if(r != null) r.close();
 									r = dbIps.InsertIP(foundIP,1,0);
 									dbIps.InsertText(r.getInt("ID"),line);
+									r.close();
 								}
 								else
 								{
 									dbIps.InsertText(r.getInt("ID"),line);
 									r.updateInt("count", r.getInt("count") + 1);
 									r.updateRow();
+									r.close();
 								}
 							}
 						}
@@ -173,12 +181,14 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 									if(r != null) r.close();
 									r = dbIps.InsertIP(foundIP,1,0);
 									dbIps.InsertText(r.getInt("ID"),line);
+									r.close();
 								}
 								else
 								{
 									dbIps.InsertText(r.getInt("ID"),line);
 									r.updateInt("count", r.getInt("count") + 1);
 									r.updateRow();
+									r.close();
 								}
 							}
 						}
@@ -195,12 +205,14 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 									if(r != null) r.close();
 									r = dbIps.InsertIP(foundIP,1,0);
 									dbIps.InsertText(r.getInt("ID"),line);
+									r.close();
 								}
 								else
 								{
 									dbIps.InsertText(r.getInt("ID"),line);
 									r.updateInt("count", r.getInt("count") + 1);
 									r.updateRow();
+									r.close();
 								}
 							}
 						}
@@ -217,12 +229,14 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 									if(r != null) r.close();
 									r = dbIps.InsertIP(foundIP,1,0);
 									dbIps.InsertText(r.getInt("ID"),line);
+									r.close();
 								}
 								else
 								{
 									dbIps.InsertText(r.getInt("ID"),line);
 									r.updateInt("count", r.getInt("count") + 1);
 									r.updateRow();
+									r.close();
 								}
 							}
 						}
@@ -258,6 +272,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			{
 				foundIP ip = new foundIP(r.getString("address"),"");
 				ip.ID = r.getInt("ID");
+				ip.count = r.getInt("count");
 				ips.put(r.getString("address"), ip);
 			}
 			
@@ -343,6 +358,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								else
 								{
 									ips.get(foundIP).line += "\n" + line;
+									ips.get(foundIP).count += 1;
 								}
 							}
 						}
@@ -360,6 +376,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								else
 								{
 									ips.get(foundIP).line += "\n" + line;
+									ips.get(foundIP).count += 1;
 								}
 							}
 						}
