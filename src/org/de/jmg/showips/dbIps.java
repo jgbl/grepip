@@ -95,6 +95,7 @@ public class dbIps
 		{
 			if (st != null) st.close();
 		}
+		s.close();
 	}
     static PreparedStatement findIP;
 	public static ResultSet queryIP(String foundIP) throws SQLException {
@@ -102,7 +103,7 @@ public class dbIps
 		if (findIP == null)
 		{
 			final String sql = "Select * FROM ip WHERE address = ?";
-		  	findIP = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		  	findIP = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
 		}
 		findIP.setString(1, foundIP);
 		return findIP.executeQuery();
@@ -113,7 +114,7 @@ public class dbIps
 		if (insertIP == null)
 		{
 			final String sql = "INSERT INTO ip (address,count,kind) VALUES(?,?,?)";
-		  	insertIP = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		  	insertIP = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
 		}
 		insertIP.setString(1, foundIP);
 		insertIP.setInt(2, count);
@@ -126,12 +127,20 @@ public class dbIps
 		if (insertText == null)
 		{
 			final String sql = "INSERT INTO text (ipID,text) VALUES(?,?)";
-		  	insertText = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.HOLD_CURSORS_OVER_COMMIT);
+		  	insertText = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, ResultSet.CLOSE_CURSORS_AT_COMMIT);
 		}
 		insertText.setString(2, text);
 		insertText.setInt(1, ID);
 		return insertText.executeQuery();
 	}
-
-	
+	public static ResultSet getAllIpsWithText() throws SQLException
+	{
+		Statement st = conn.createStatement();
+		return st.executeQuery("Select * from ip right join text on ip.ID = text.ipID");
+	}
+	public static ResultSet getAllIps() throws SQLException
+	{
+		Statement st = conn.createStatement();
+		return st.executeQuery("Select * from ip ORDER BY address");
+	}
 }

@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -29,10 +28,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -50,8 +47,6 @@ import javax.swing.JTextArea;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 
-import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 //import com.mysql.*;
 
@@ -78,6 +73,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			public String ip;
 			public String line;
 			public int count;
+			public int ID;
 
 			@Override
 			public String toString()
@@ -117,7 +113,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			{
 			}
 		}
-		private ResultSet parsefileSQL(File file)
+		private ArrayList<Entry<String, foundIP>> parsefileSQL(File file) throws SQLException
 		{
 			final String IPADDRESS_PATTERN = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
 			final String IP6PatternStd = "(^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})";
@@ -158,8 +154,9 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								}
 								else
 								{
-									ips.get(foundIP).line += "\n" + line;
-									ips.get(foundIP).count += 1;
+									dbIps.InsertText(r.getInt("ID"),line);
+									r.updateInt("count", r.getInt("count") + 1);
+									r.updateRow();
 								}
 							}
 						}
@@ -170,14 +167,18 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 							{
 								foundIP = matcher.group();
 								foundips.add(foundIP);
-								if (!ips.containsKey(foundIP))
+								ResultSet r = dbIps.queryIP(foundIP);
+								if (r == null || !r.first())
 								{
-									ips.put(foundIP, new foundIP(foundIP, line));
+									if(r != null) r.close();
+									r = dbIps.InsertIP(foundIP,1,0);
+									dbIps.InsertText(r.getInt("ID"),line);
 								}
 								else
 								{
-									ips.get(foundIP).line += "\n" + line;
-									ips.get(foundIP).count += 1;
+									dbIps.InsertText(r.getInt("ID"),line);
+									r.updateInt("count", r.getInt("count") + 1);
+									r.updateRow();
 								}
 							}
 						}
@@ -188,13 +189,18 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 							{
 								foundIP = matcher.group();
 								foundips.add(foundIP);
-								if (!ips.containsKey(foundIP))
+								ResultSet r = dbIps.queryIP(foundIP);
+								if (r == null || !r.first())
 								{
-									ips.put(foundIP, new foundIP(foundIP, line));
+									if(r != null) r.close();
+									r = dbIps.InsertIP(foundIP,1,0);
+									dbIps.InsertText(r.getInt("ID"),line);
 								}
 								else
 								{
-									ips.get(foundIP).line += "\n" + line;
+									dbIps.InsertText(r.getInt("ID"),line);
+									r.updateInt("count", r.getInt("count") + 1);
+									r.updateRow();
 								}
 							}
 						}
@@ -205,13 +211,18 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 							{
 								foundIP = matcher.group();
 								foundips.add(foundIP);
-								if (!ips.containsKey(foundIP))
+								ResultSet r = dbIps.queryIP(foundIP);
+								if (r == null || !r.first())
 								{
-									ips.put(foundIP, new foundIP(foundIP, line));
+									if(r != null) r.close();
+									r = dbIps.InsertIP(foundIP,1,0);
+									dbIps.InsertText(r.getInt("ID"),line);
 								}
 								else
 								{
-									ips.get(foundIP).line += "\n" + line;
+									dbIps.InsertText(r.getInt("ID"),line);
+									r.updateInt("count", r.getInt("count") + 1);
+									r.updateRow();
 								}
 							}
 						}
@@ -236,21 +247,24 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-
+			catch (SQLException ex)
+			{
+				JOptionPane.showMessageDialog(frame, ex.getMessage());
+			}
+			
+			LinkedHashMap<String, foundIP> ips = new LinkedHashMap<>();
+			ResultSet r = dbIps.getAllIps();
+			while (r.next())
+			{
+				foundIP ip = new foundIP(r.getString("address"),"");
+				ip.ID = r.getInt("ID");
+				ips.put(r.getString("address"), ip);
+			}
+			
 			ArrayList<Entry<String, foundIP>> iplist = new ArrayList<>(
 					ips.entrySet());
-			Collections.sort(iplist, new Comparator<Entry<String, foundIP>>()
-			{
-
-				@Override
-				public int compare(Entry<String, foundIP> o1,
-						Entry<String, foundIP> o2)
-				{
-					// TODO Auto-generated method stub
-					return o1.getKey().compareToIgnoreCase(o2.getKey());
-				}
-			});
-			return null;
+			
+			return iplist;
 			
 		}
 

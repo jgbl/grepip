@@ -3,9 +3,6 @@ package org.de.jmg.showips;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -56,6 +53,11 @@ public class ExecuteCommand
 
 	public class TestPane extends JPanel
 	{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
 		public TestPane()
 		{
