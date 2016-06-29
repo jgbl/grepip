@@ -29,7 +29,6 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -316,7 +315,8 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			final String IP6PatternStd = "((?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})";
 			final String IP6PatternCompr = "(((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?))";
 			final String IP6PatternAlt = "(?<![[:alnum:]]|[[:alnum:]]:)(?:(?:[a-f0-9]{1,4}:){7}[a-f0-9]{1,4}|(?:[a-f0-9]{1,4}:){1,6}:(?:[a-f0-9]{1,4}:){0,5}[a-f0-9]{1,4})(?![[:alnum:]]:?)";
-			final String IP6PatternAll = "(((?<= )[A-Za-z,-]+?_){0,1}[0-9A-Fa-f]{1,4}:?[0-9A-Fa-f]{1,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:[0-9A-Fa-f]{0,4})";//"(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
+			//final String IP6PatternAll = "(((?<= )[A-Za-z,-]+?_){0,1}[0-9A-Fa-f]{1,4}:?[0-9A-Fa-f]{1,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:[0-9A-Fa-f]{0,4})";//"(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
+			final String IP6PatternAll = "(((?<= )[0-9A-Za-z,-]+?_){0,1}([0-9A-Fa-f]{0,4}::?){1,7}[0-9A-Fa-f]{1,4})";
 			final Pattern patternip4 = Pattern.compile(IPADDRESS_PATTERN);
 			final Pattern patternip6std = Pattern.compile(IP6PatternStd);
 			final Pattern patternip6compr = Pattern.compile(IP6PatternCompr);
@@ -567,7 +567,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 					e1.printStackTrace();
 					line = item.getKey() + " " + " " + item.getValue().line;
 					model.addRow(new Object[] { item.getKey(), "invalid", "",
-							item.getValue().line });
+							item.getValue().line, item.getValue().count });
 
 				}
 				if (line != null) sb.append(line);
@@ -860,36 +860,53 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 									{
 										// PBDemo Terminal = new PBDemo(
 										// "blcheck", ip);
-										if (OSValidator.isWindows())
+										if (Button == MouseEvent.BUTTON1)
 										{
-											JOptionPane
-													.showMessageDialog(
+											if (OSValidator.isWindows())
+											{
+												JOptionPane
+														.showMessageDialog(
+																listview,
+																"This function is not available \non Windows!");
+											}
+											else
+											{
+												int exitCode = 0;
+												ProcessBuilder pb = new ProcessBuilder(
+														"xterm", "-hold", "-e",
+														"bash", "blcheck", ip);
+												// pb.redirectError();
+												try
+												{
+													Process pro = pb.start();
+													exitCode = pro.waitFor();
+
+												}
+												catch (Exception e)
+												{
+													System.out.println("sorry" + e);
+													JOptionPane.showMessageDialog(
 															listview,
-															"This function is not available \non Windows!");
+															e.getMessage());
+
+												}
+											}
 										}
 										else
 										{
-											int exitCode = 0;
-											ProcessBuilder pb = new ProcessBuilder(
-													"xterm", "-hold", "-e",
-													"bash", "blcheck", ip);
-											// pb.redirectError();
 											try
 											{
-												Process pro = pb.start();
-												exitCode = pro.waitFor();
-
+												openWebpage(new URL(
+														"https://www.virustotal.com/en/ip-address/" 
+																+ ip + "/information/"));
 											}
-											catch (Exception e)
+											catch (MalformedURLException e)
 											{
-												System.out.println("sorry" + e);
-												JOptionPane.showMessageDialog(
-														listview,
-														e.getMessage());
-
+												// TODO Auto-generated
+												// catch block
+												e.printStackTrace();
 											}
 										}
-
 									}
 
 								}
