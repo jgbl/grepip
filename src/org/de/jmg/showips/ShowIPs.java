@@ -530,8 +530,8 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 						// process the line.
 						ii++;
 						fields = line.split("\t");
-						flds = msnmFields.Conv_Id;
-						if (fields.length == flds.ordinal() +1 )
+						flds = msnmFields.Destination;
+						if (fields.length >= flds.ordinal() +1 )
 						{
 							for (int i = 0;i < 2; i++)
 							{
