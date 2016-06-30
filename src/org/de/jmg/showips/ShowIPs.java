@@ -93,8 +93,9 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 				count += 1;
 			}
 
-			public String ip;
-			public String line;
+			public String ip = null;
+			public String host = null;
+			public String line = null;
 			public int count;
 			public int ID;
 
@@ -316,12 +317,15 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			final String IP6PatternCompr = "(((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?))";
 			final String IP6PatternAlt = "(?<![[:alnum:]]|[[:alnum:]]:)(?:(?:[a-f0-9]{1,4}:){7}[a-f0-9]{1,4}|(?:[a-f0-9]{1,4}:){1,6}:(?:[a-f0-9]{1,4}:){0,5}[a-f0-9]{1,4})(?![[:alnum:]]:?)";
 			//final String IP6PatternAll = "(((?<= )[A-Za-z,-]+?_){0,1}[0-9A-Fa-f]{1,4}:?[0-9A-Fa-f]{1,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:[0-9A-Fa-f]{0,4})";//"(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
-			final String IP6PatternAll = "(((?<= )[0-9A-Za-z,-]+?_){0,1}([0-9A-Fa-f]{0,4}::?){1,7}[0-9A-Fa-f]{1,4})";
+			//final String IP6PatternAll = "(((?<= )[0-9A-Za-z,-]+?_){0,1}([0-9A-Fa-f]{0,4}::?){1,7}[0-9A-Fa-f]{1,4})";
+			final String ValidHostnameRegex = "(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])";
 			final Pattern patternip4 = Pattern.compile(IPADDRESS_PATTERN);
 			final Pattern patternip6std = Pattern.compile(IP6PatternStd);
 			final Pattern patternip6compr = Pattern.compile(IP6PatternCompr);
 			final Pattern patternip6alt = Pattern.compile(IP6PatternAlt);
-			final Pattern patternip6all = Pattern.compile(IP6PatternAll);
+			//final Pattern patternip6all = Pattern.compile(IP6PatternAll);
+			final Pattern patternhostname = Pattern.compile(ValidHostnameRegex);
+			
 			LinkedHashMap<String, foundIP> ips = new LinkedHashMap<>();
 			frame.setTitle("searching ips");
 			int ii = 0;
@@ -409,6 +413,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								}
 							}
 						}
+						/*
 						matcher = patternip6all.matcher(line);
 						while (matcher.find())
 						{
@@ -425,6 +430,30 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 									//ips.get(foundIP).line += "\n" + line;
 									ips.get(foundIP).count += 1;
 								}
+							}
+						}
+						*/
+						matcher = patternhostname.matcher(line);
+						while (matcher.find())
+						{
+							if (!foundips.contains(matcher.group()))
+							{
+								foundIP = matcher.group();
+								foundips.add(foundIP);
+								
+								if (!ips.containsKey(foundIP))
+								{
+									foundIP f = new foundIP(foundIP,line);
+									f.host = foundIP;
+									ips.put(foundIP, new foundIP(foundIP, line));
+								}
+								else
+								{
+									//ips.get(foundIP).line += "\n" + line;
+									ips.get(foundIP).count += 1;
+								}
+								
+								
 							}
 						}
 						if (ii % 100 == 0)
@@ -502,10 +531,20 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 							e.printStackTrace();
 						}
 					}
-					String host = addr.getHostName();
+					String host = null;
+					if (item.getValue().host != null)
+					{
+						host = item.getValue().host;
+						item.getValue().ip = addr.getHostAddress();
+					}
+					else
+					{
+						host = addr.getHostName();
+						item.getValue().host = host;
+					}
 					frame.setTitle("found host:" + host + " " + ii + "("
 							+ count + ")");
-					if (!host.equalsIgnoreCase(item.getKey()))
+					if (!host.equalsIgnoreCase(item.getValue().ip))
 					{
 						domain = new URI("//" + host).getHost();
 						if (domain != null && domain.equalsIgnoreCase(host))
@@ -530,13 +569,13 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 					{
 						type = "multi";
 					}
-					line = item.getKey() + " " + host + " "
+					line = item.getValue().ip + " " + host + " "
 							+ item.getValue().line;
 					if (item.getValue().line.contains("DROP"))
 					{
 						type += " drop";
 					}
-					if (critical.containsKey(item.getKey())
+					if (critical.containsKey(item.getValue().ip)
 							|| critical.containsKey(domain)
 							|| critical.containsKey(host))
 					{
@@ -544,7 +583,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 					}
 					else
 					{
-						if (!host.equalsIgnoreCase(item.getKey()))
+						if (!host.equalsIgnoreCase(item.getValue().ip))
 						{
 							int i = -1;
 							while ((i = host.indexOf('.', i + 1)) >= 0)
@@ -558,15 +597,15 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 							}
 						}
 					}
-					model.addRow(new Object[] { item.getKey(), host, type,
+					model.addRow(new Object[] { item.getValue().ip, host, type,
 							item.getValue().line, item.getValue().count });
 				}
 				catch (Exception e1)
 				{
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-					line = item.getKey() + " " + " " + item.getValue().line;
-					model.addRow(new Object[] { item.getKey(), "invalid", "",
+					line = item.getValue().ip + " " + " " + item.getValue().line;
+					model.addRow(new Object[] { item.getValue().ip, "invalid", "",
 							item.getValue().line, item.getValue().count });
 
 				}
