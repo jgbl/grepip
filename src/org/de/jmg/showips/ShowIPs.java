@@ -61,12 +61,17 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 	public static Button button;
 	public static JMenuBar mb;
 	public static JMenu mnudefault;
-	public static JMenuItem mnuClearDB;
+	public static JMenuItem mnuParseMSNM;
 	public static JFileChooser fc = new JFileChooser();
 	public static JTable listview;
 	public static DefaultTableModel model = new DefaultTableModel(new Object[] {
-			"IP", "Host", "Type", "Log", "Count" }, 0);
+			"IP", "Host", "Type", "Process", "Log", "Count" }, 0);
 	public static LinkedHashMap<String, String[]> critical = new LinkedHashMap<>();
+	public enum msnmFields
+	{
+		Frame, Time_Date, Time_Offset, Process, Source, Destination, Protocol_Name, Description, Conv_Id
+	}
+	
 	public static ActionListener ActionLMenu = new ActionListener()
 	{
 
@@ -96,9 +101,11 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			public String ip = null;
 			public String host = null;
 			public String line = null;
+			public String process = null;
+
 			public int count;
 			public int ID;
-
+			
 			@Override
 			public String toString()
 			{
@@ -119,7 +126,14 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 				ArrayList<Entry<String, foundIP>> iplist = null;
 				try 
 				{
-					iplist = parsefile(file);
+					if (e.getSource() == button)
+					{
+						iplist = parsefile(file);
+					}
+					else if ( e.getSource()== mnuParseMSNM)
+					{
+						iplist = parsefilemsnm(file);
+					}
 				} 
 				catch (Exception e1) 
 				{
@@ -318,13 +332,13 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			final String IP6PatternAlt = "(?<![[:alnum:]]|[[:alnum:]]:)(?:(?:[a-f0-9]{1,4}:){7}[a-f0-9]{1,4}|(?:[a-f0-9]{1,4}:){1,6}:(?:[a-f0-9]{1,4}:){0,5}[a-f0-9]{1,4})(?![[:alnum:]]:?)";
 			//final String IP6PatternAll = "(((?<= )[A-Za-z,-]+?_){0,1}[0-9A-Fa-f]{1,4}:?[0-9A-Fa-f]{1,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:?[0-9A-Fa-f]{0,4}:[0-9A-Fa-f]{0,4})";//"(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
 			//final String IP6PatternAll = "(((?<= )[0-9A-Za-z,-]+?_){0,1}([0-9A-Fa-f]{0,4}::?){1,7}[0-9A-Fa-f]{1,4})";
-			final String ValidHostnameRegex = "(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])";
+			//final String ValidHostnameRegex = "(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])";
 			final Pattern patternip4 = Pattern.compile(IPADDRESS_PATTERN);
 			final Pattern patternip6std = Pattern.compile(IP6PatternStd);
 			final Pattern patternip6compr = Pattern.compile(IP6PatternCompr);
 			final Pattern patternip6alt = Pattern.compile(IP6PatternAlt);
 			//final Pattern patternip6all = Pattern.compile(IP6PatternAll);
-			final Pattern patternhostname = Pattern.compile(ValidHostnameRegex);
+			//final Pattern patternhostname = Pattern.compile(ValidHostnameRegex);
 			
 			LinkedHashMap<String, foundIP> ips = new LinkedHashMap<>();
 			frame.setTitle("searching ips");
@@ -433,6 +447,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 							}
 						}
 						*/
+						/*
 						matcher = patternhostname.matcher(line);
 						while (matcher.find())
 						{
@@ -454,6 +469,95 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								}
 								
 								
+							}
+						}
+						*/
+						if (ii % 100 == 0)
+						{
+							frame.setTitle("read " + ii);
+						}
+
+						
+					}
+					
+				}
+			}
+			// This is where a real application would open the file.
+			catch (FileNotFoundException e1)
+			{
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			catch (IOException e1)
+			{
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			ArrayList<Entry<String, foundIP>> iplist = new ArrayList<>(
+					ips.entrySet());
+			Collections.sort(iplist, new Comparator<Entry<String, foundIP>>()
+			{
+
+				@Override
+				public int compare(Entry<String, foundIP> o1,
+						Entry<String, foundIP> o2)
+				{
+					// TODO Auto-generated method stub
+					return o1.getKey().compareToIgnoreCase(o2.getKey());
+				}
+			});
+			return iplist;
+		}
+		
+		
+		private ArrayList<Entry<String, foundIP>> parsefilemsnm(File file)
+		{
+			msnmFields flds = msnmFields.Frame;
+			LinkedHashMap<String, foundIP> ips = new LinkedHashMap<>();
+			frame.setTitle("searching ips");
+			int ii = 0;
+			try (BufferedReader br = new BufferedReader(new FileReader(file)))
+			{
+				String line;
+				String fields[];
+				//Frame, Time Date, Time Offset, Process, Source, Destination, Protocol Name, Description, Conv Id
+				
+				while ((line = br.readLine()) != null)
+				{
+					if (line.length() > 3)
+					{
+						// process the line.
+						ii++;
+						fields = line.split("\t");
+						flds = msnmFields.Conv_Id;
+						if (fields.length == flds.ordinal() +1 )
+						{
+							for (int i = 0;i < 2; i++)
+							{
+								String foundIP = "";
+								if (i == 0)
+								{
+									flds = msnmFields.Source;
+									foundIP = fields[flds.ordinal()];
+								}
+								else
+								{
+									flds = msnmFields.Destination;
+									foundIP = fields[flds.ordinal()];
+								}
+								if (foundIP != "" && !ips.containsKey(foundIP))
+								{
+									foundIP F = new foundIP(foundIP, line);
+									flds = msnmFields.Process;
+									F.process = fields[flds.ordinal()];
+									ips.put(foundIP, F);
+								}
+								else
+								{
+									//ips.get(foundIP).line += "\n" + line;
+									ips.get(foundIP).count += 1;
+								}
 							}
 						}
 						if (ii % 100 == 0)
@@ -494,6 +598,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			return iplist;
 		}
 
+
 		String join(List<Entry<String, foundIP>> list, String conjunction)
 		{
 			StringBuilder sb = new StringBuilder();
@@ -532,6 +637,10 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 						}
 					}
 					String host = null;
+					item.getValue().ip = addr.getHostAddress();
+					item.getValue().host = addr.getHostName();
+					host = item.getValue().host;
+					/*
 					if (item.getValue().host != null)
 					{
 						host = item.getValue().host;
@@ -542,6 +651,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 						host = addr.getHostName();
 						item.getValue().host = host;
 					}
+					*/
 					frame.setTitle("found host:" + host + " " + ii + "("
 							+ count + ")");
 					if (!host.equalsIgnoreCase(item.getValue().ip))
@@ -598,7 +708,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 						}
 					}
 					model.addRow(new Object[] { item.getValue().ip, host, type,
-							item.getValue().line, item.getValue().count });
+							item.getValue().process, item.getValue().line, item.getValue().count });
 				}
 				catch (Exception e1)
 				{
@@ -606,7 +716,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 					e1.printStackTrace();
 					line = item.getValue().ip + " " + " " + item.getValue().line;
 					model.addRow(new Object[] { item.getValue().ip, "invalid", "",
-							item.getValue().line, item.getValue().count });
+							item.getValue().process, item.getValue().line, item.getValue().count });
 
 				}
 				if (line != null) sb.append(line);
@@ -698,9 +808,9 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 		listview.getColumnModel().getColumn(0)
 				.setCellRenderer(new StatusColumnCellRenderer());
 		mb = new JMenuBar();
-		//mnuClearDB = new JMenuItem("Clear DB");
-		//mnuClearDB.addActionListener(ActionLMenu);
-		//mb.add(mnuClearDB);
+		mnuParseMSNM = new JMenuItem("msnm");
+		mnuParseMSNM.addActionListener(ActionL);
+		mb.add(mnuParseMSNM);
 		JScrollPane pane = new JScrollPane(listview);
 		frame.add(mb, BorderLayout.NORTH);
 		frame.add(pane, BorderLayout.CENTER);
@@ -950,10 +1060,10 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 
 								}
 							}
-							else if (col == 3)
+							else if (col == 4)
 							{
 								String log = (String) tableModel.getValueAt(
-										row, 3);
+										row, 4);
 								JTextArea textArea = new JTextArea(30, 75);
 								textArea.setText(log);
 								textArea.setEditable(false);
