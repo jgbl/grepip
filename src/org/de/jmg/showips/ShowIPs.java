@@ -59,6 +59,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 {
 	public static Frame frame;
 	public static Button button;
+	public static String filename;
 	public static JMenuBar mb;
 	public static JMenu mnudefault;
 	public static JMenuItem mnuParseMSNM;
@@ -123,6 +124,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			if (returnVal == JFileChooser.APPROVE_OPTION)
 			{
 				File file = fc.getSelectedFile();
+				filename = file.getName();
 				ArrayList<Entry<String, foundIP>> iplist = null;
 				try 
 				{
@@ -558,7 +560,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 									//ips.get(foundIP).line += "\n" + line;
 									foundIP F = ips.get(foundIP);
 									F.count += 1;
-									if (F.process == null || F.process.trim() == "")
+									if (F.process == null || F.process.trim().equalsIgnoreCase("") || F.process.length()< 3)
 									{
 										flds = msnmFields.Process;
 										F.process = fields[flds.ordinal()];
@@ -705,7 +707,8 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 							while ((i = host.indexOf('.', i + 1)) >= 0)
 							{
 								domain = host.substring(i + 1);
-								if (critical.containsKey(domain))
+								if (domain.indexOf('.') < 1) break;
+								if (critical.containsKey(domain) || (critical.containsKey("www." + domain)))
 								{
 									type += " critical";
 									break;
@@ -729,6 +732,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 			}
 			listview.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 			listview.doLayout();
+			frame.setTitle(filename);
 			return sb.toString();
 		}
 
