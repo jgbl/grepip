@@ -556,7 +556,13 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 								else
 								{
 									//ips.get(foundIP).line += "\n" + line;
-									ips.get(foundIP).count += 1;
+									foundIP F = ips.get(foundIP);
+									F.count += 1;
+									if (F.process == null || F.process.trim() == "")
+									{
+										flds = msnmFields.Process;
+										F.process = fields[flds.ordinal()];
+									}
 								}
 							}
 						}
