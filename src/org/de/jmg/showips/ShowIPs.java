@@ -1143,9 +1143,27 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 					if (!line.startsWith("#field"))
 					{
 						String[] fields = line.split("\\t");
-						if (!critical.containsKey(fields[0]))
+						String key = fields[0];
+						String domain = null;
+						try
 						{
-							critical.put(fields[0], fields);
+							if (fields[1].equalsIgnoreCase("Intel::URL"))
+							{
+								domain = new URL("http://" + key).getHost();
+								if (!domain.equalsIgnoreCase(key))
+								{
+									key = domain;
+								}
+							}
+							
+						}
+						catch (Exception ex)
+						{
+							
+						}
+						if (!critical.containsKey(key))
+						{
+							critical.put(key, fields);
 						}
 					}
 				}
