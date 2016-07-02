@@ -1154,6 +1154,7 @@ public class ShowIPs implements ClipboardOwner, ActionListener
 							if (fields[1].equalsIgnoreCase("Intel::URL"))
 							{
 								domain = new URL("http://" + key).getHost();
+								//getting hostname for URL's
 								if (!domain.equalsIgnoreCase(key))
 								{
 									key = domain;
